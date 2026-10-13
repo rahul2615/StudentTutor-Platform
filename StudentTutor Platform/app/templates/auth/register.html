@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — EduConnect{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: center; min-height: 60vh; padding: 2rem 0;">
+    <div class="form-wrapper animate-fade-in-up" style="width: 100%; max-width: 430px; margin: 0; border-top: 4px solid var(--accent-emerald);">
+        <div class="text-center" style="margin-bottom: 1.75rem;">
+            <div class="stat-icon stat-icon-emerald" style="margin: 0 auto 0.85rem; width: 48px; height: 48px; font-size: 1.25rem;">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+            </div>
+            <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.35rem;">Create an Account</h1>
+            <p class="text-muted" style="font-size: 0.875rem;">Join as a student or apply as an instructor</p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <!-- Username Field -->
+            <div class="form-group">
+                {{ form.username.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.username(class="form-control", placeholder="Choose a username", autocomplete="username") }}
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.email(class="form-control", placeholder="your.email@example.com (optional)", autocomplete="email") }}
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.password(class="form-control", placeholder="Create a password", autocomplete="new-password") }}
+                    <i class="fas fa-lock" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <!-- Role Selection Field -->
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                {{ form.role.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.role(class="form-control") }}
+                    <i class="fas fa-id-badge" aria-hidden="true"></i>
+                </div>
+                <div class="form-hint">Tutor accounts require admin approval before signing in.</div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-success btn-block btn-lg" style="margin-bottom: 1.25rem;">
+                Register Account <i class="fas fa-check" aria-hidden="true"></i>
+            </button>
+
+            <!-- Login Link -->
+            <div class="text-center" style="font-size: 0.875rem;">
+                <span class="text-muted">Already a member?</span>
+                <a href="{{ url_for('auth.login') }}" class="font-semibold" style="margin-left: 0.25rem;">Sign in here</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

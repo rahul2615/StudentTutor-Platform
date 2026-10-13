@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }}'s Profile — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 680px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">User Profile</h1>
+        <p class="page-subtitle">Manage your personal account details</p>
+    </div>
+    <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline">
+        Edit Profile
+    </a>
+</div>
+
+<div class="card" style="max-width: 680px; margin: 0 auto;">
+    <div class="card-body">
+        <div style="display: flex; gap: 1.75rem; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Profile Avatar -->
+            <div style="text-align: center;">
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="{{ user.username }}" style="width: 96px; height: 96px; border-radius: var(--radius-full); object-fit: cover; border: 1px solid var(--border);">
+                {% else %}
+                    <div style="width: 96px; height: 96px; border-radius: var(--radius-full); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2.25rem; font-weight: 700;">
+                        {{ user.username[0]|upper }}
+                    </div>
+                {% endif %}
+                <div style="margin-top: 0.85rem;">
+                    <span class="badge badge-secondary">
+                        {{ user.role|capitalize }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Profile Details -->
+            <div style="flex: 1; min-width: 240px;">
+                <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.25rem;">{{ user.username }}</h2>
+                <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 1.25rem;">
+                    {{ user.email or 'No email address added' }}
+                </p>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 1.25rem;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem;">About</h3>
+                    <p style="white-space: pre-line; color: var(--text-body); font-size: 0.9rem; line-height: 1.5;">
+                        {{ user.bio or 'No bio provided yet.' }}
+                    </p>
+                </div>
+
+                {% if user.role == 'tutor' %}
+                <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; display: flex; gap: 1.5rem;">
+                    <div>
+                        <div class="text-xs text-muted font-semibold">TUTOR STATUS</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.2rem;">
+                            {% if user.is_approved %}
+                                <span class="badge badge-success">Approved Instructor</span>
+                            {% else %}
+                                <span class="badge badge-warning">Pending Approval</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-muted font-semibold">COURSES</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.2rem; font-weight: 600;">
+                            {{ user.courses|length }}
+                        </div>
+                    </div>
+                </div>
+                {% elif user.role == 'student' %}
+                <div style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem;">
+                    <div class="text-xs text-muted font-semibold">ENROLLED COURSES</div>
+                    <div style="font-size: 0.9rem; margin-top: 0.2rem; font-weight: 600;">
+                        {{ user.enrollments|length }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

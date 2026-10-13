@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} — Course Details{% endblock %}
+
+{% block content %}
+<!-- Hero Header -->
+<div class="welcome-banner animate-fade-in-up">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+            {% if current_user.role == 'tutor' %}
+                <a href="{{ url_for('tutor.dashboard') }}" class="btn btn-outline btn-sm" style="margin-bottom: 0.75rem;">
+                    &larr; Dashboard
+                </a>
+            {% elif current_user.role == 'student' %}
+                <a href="{{ url_for('student.courses') }}" class="btn btn-outline btn-sm" style="margin-bottom: 0.75rem;">
+                    &larr; Courses
+                </a>
+            {% else %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-sm" style="margin-bottom: 0.75rem;">
+                    &larr; Dashboard
+                </a>
+            {% endif %}
+            
+            <!-- Category & Difficulty Level Badges -->
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <span class="badge badge-purple" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                    <i class="fas fa-tag" aria-hidden="true"></i> {{ course.category }}
+                </span>
+                
+                <!-- Level Badge Chip -->
+                {% if course.level == 'Beginner' %}
+                    <span class="badge badge-info" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                        <i class="fas fa-seedling" aria-hidden="true"></i> Beginner
+                    </span>
+                {% elif course.level == 'Intermediate' %}
+                    <span class="badge badge-warning" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                        <i class="fas fa-layer-group" aria-hidden="true"></i> Intermediate
+                    </span>
+                {% else %}
+                    <span class="badge badge-purple" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                        <i class="fas fa-mountain" aria-hidden="true"></i> Advanced
+                    </span>
+                {% endif %}
+
+                {% if course.duration %}
+                <span class="badge badge-secondary" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                    <i class="fas fa-clock" aria-hidden="true"></i> {{ course.duration }}
+                </span>
+                {% endif %}
+                {% if course.is_free %}
+                    <span class="badge badge-success" style="font-size: 0.825rem; padding: 0.35rem 0.8rem;">
+                        <i class="fas fa-gift" aria-hidden="true"></i> FREE
+                    </span>
+                {% else %}
+                    <span class="badge badge-amber" style="font-size: 0.825rem; padding: 0.35rem 0.8rem; font-weight: 700;">
+                        <i class="fas fa-tag" aria-hidden="true"></i> {{ "%.2f"|format(course.price) }} {{ course.currency.upper() }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Course Title -->
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 0.6rem; margin-bottom: 0.35rem; color: var(--text-main);">
+                {{ course.title }}
+            </h1>
+
+            <!-- Tutor Info & Verified Badge -->
+            <p class="text-muted" style="margin-size: 0.95rem;">
+                Instructor: <strong>{{ course.tutor.username }}</strong>
+                {% if course.tutor.is_verified %}
+                    <span class="badge badge-primary" style="margin-left: 0.35rem;" title="Verified Credentials Check">
+                        <i class="fas fa-check-circle text-primary" aria-hidden="true"></i> Verified Tutor
+                    </span>
+                {% endif %}
+                {% if current_user.id != course.tutor_id %}
+                    &bull; <a href="{{ url_for('engagement.chat_thread', user_id=course.tutor_id) }}" class="text-primary font-semibold">Chat with Tutor</a>
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            {# Wishlist Toggle (Student) #}
+            {% if current_user.role == 'student' %}
+                <form action="{{ url_for('engagement.toggle_wishlist', course_id=course.id) }}" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn {% if current_user.is_wishlisted(course.id) %}btn-primary{% else %}btn-outline{% endif %} btn-lg">
+                        <i class="fas fa-bookmark" aria-hidden="true"></i> {% if current_user.is_wishlisted(course.id) %}Wishlisted{% else %}Wishlist{% endif %}
+                    </button>
+                </form>
+            {% endif %}
+
+            {# Student Actions: Single Enroll Button / Unenroll / Certificate #}
+            {% if current_user.role == 'student' and course.is_approved %}
+                {% if enrollment %}
+                    {% if enrollment.progress >= 100 %}
+                        <a href="{{ url_for('student.view_certificate', course_id=course.id) }}" class="btn btn-success btn-lg" target="_blank">
+                            <i class="fas fa-award" aria-hidden="true"></i> View Certificate
+                        </a>
+                    {% endif %}
+                    <form action="{{ url_for('student.unenroll', course_id=course.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Unenroll from {{ course.title }}?');">
+                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                            Unenroll
+                        </button>
+                    </form>
+                {% else %}
+                    {% if course.is_free or current_user.has_active_subscription() %}
+                        <form action="{{ url_for('student.enroll', course_id=course.id) }}" method="POST" style="margin: 0;">
+                            <button type="submit" class="btn btn-primary btn-lg" style="animation: pulseSubtle 2.5s infinite ease-in-out;">
+                                <i class="fas fa-user-plus" aria-hidden="true"></i> Enroll Now {% if current_user.has_active_subscription() and not course.is_free %}(Pass Access){% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('payment.checkout', course_id=course.id) }}" class="btn btn-primary btn-lg" style="animation: pulseSubtle 2.5s infinite ease-in-out;">
+                            <i class="fas fa-shopping-cart" aria-hidden="true"></i> Buy Course — {{ "%.2f"|format(course.price) }} {{ course.currency.upper() }}
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {# Tutor / Admin Actions #}
+            {% if current_user.id == course.tutor_id or current_user.role == 'admin' %}
+                <a href="{{ url_for('tutor.handle_create_quiz', course_id=course.id) }}" class="btn btn-outline-primary btn-sm">
+                    + Create Quiz
+                </a>
+                <a href="{{ url_for('tutor.schedule_session', course_id=course.id) }}" class="btn btn-outline btn-sm">
+                    Schedule Class
+                </a>
+                <a href="{{ url_for('tutor.handle_edit_course', course_id=course.id) }}" class="btn btn-outline btn-sm">
+                    Edit
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="kpi-grid animate-fade-in-up" style="margin-bottom: 2rem;">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-indigo">
+            <i class="fas fa-users" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ course.student_count }}">{{ course.student_count }}</div>
+            <div class="kpi-label">Students Enrolled</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-star" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="kpi-number">{{ course.average_rating }} / 5.0</div>
+            <div class="kpi-label">{{ course.reviews|length }} Rating{% if course.reviews|length != 1 %}s{% endif %}</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-emerald">
+            <i class="fas fa-stream" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="kpi-number">{{ course.modules|length }}</div>
+            <div class="kpi-label">Course Modules</div>
+        </div>
+    </div>
+
+    {% if enrollment %}
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-purple">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="kpi-number">{{ enrollment.progress }}%</div>
+            <div class="kpi-label">Your Progress</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Main 2-Column Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Left Column: Modules/Lessons Structure, Quizzes, Notes -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Overview -->
+        <div class="card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Course Overview</h3>
+                <a href="{{ url_for('engagement.course_forum', course_id=course.id) }}" class="btn btn-outline-primary btn-sm">
+                    Q&A Forum
+                </a>
+            </div>
+            <p style="white-space: pre-line; line-height: 1.65; color: var(--text-body); font-size: 0.925rem;">{{ course.description }}</p>
+        </div>
+
+        <!-- Ordered Modules & Lessons Structure -->
+        <div class="card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">
+                    <i class="fas fa-list-ol text-primary" aria-hidden="true"></i> Modules & Lessons ({{ course.modules|length }})
+                </h3>
+            </div>
+
+            {% if course.modules %}
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for mod in course.modules %}
+                    <details style="background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 0.85rem 1rem;">
+                        <summary style="font-weight: 700; color: var(--text-main); cursor: pointer; font-size: 0.925rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Module {{ mod.order }}: {{ mod.title }}</span>
+                            <span class="text-xs text-muted">Click to view lesson</span>
+                        </summary>
+                        {% if mod.content %}
+                        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.875rem; color: var(--text-body); line-height: 1.6; white-space: pre-line;">
+                            {{ mod.content }}
+                        </div>
+                        {% endif %}
+                    </details>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted">No structured modules added yet.</p>
+            {% endif %}
+
+            <!-- Add Module Form for Tutor/Admin -->
+            {% if current_user.id == course.tutor_id or current_user.role == 'admin' %}
+            <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+                <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">+ Add New Lesson Module</h4>
+                <form action="{{ url_for('tutor.add_module', course_id=course.id) }}" method="POST">
+                    {{ module_form.hidden_tag() }}
+                    <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div>
+                            {{ module_form.title(class="form-control", placeholder="Module Title e.g. Lesson 1: Introduction") }}
+                        </div>
+                        <div>
+                            {{ module_form.order(class="form-control", placeholder="Order") }}
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0.75rem;">
+                        {{ module_form.content(class="form-control", placeholder="Lesson content notes, instructions or outline...", rows=2) }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Save Lesson Module
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Student Study Notes & Bookmarks Widget -->
+        {% if current_user.role == 'student' and enrollment %}
+        <div class="card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">
+                <i class="fas fa-sticky-note text-amber" aria-hidden="true"></i> My Personal Study Notes ({{ user_notes|length }})
+            </h3>
+
+            <!-- Add Note Form -->
+            <form action="{{ url_for('student.add_student_note', course_id=course.id) }}" method="POST" style="margin-bottom: 1.25rem;">
+                {{ note_form.hidden_tag() }}
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                    {{ note_form.content(class="form-control", placeholder="Write a personal study note or bookmark reference...", rows=2) }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-save" aria-hidden="true"></i> Save Study Note
+                </button>
+            </form>
+
+            <!-- Saved Notes List -->
+            {% if user_notes %}
+                <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                    {% for note in user_notes %}
+                    <div style="padding: 0.85rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem;">
+                        <div>
+                            <p style="margin: 0; font-size: 0.875rem; color: var(--text-main); line-height: 1.4;">{{ note.content }}</p>
+                            <span class="text-xs text-muted">{{ note.created_at.strftime('%b %d, %H:%M') }}</span>
+                        </div>
+                        <form action="{{ url_for('student.delete_student_note', note_id=note.id) }}" method="POST" style="margin: 0;">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" style="padding: 0.2rem 0.4rem;" title="Delete note">
+                                &times;
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted" style="margin: 0;">You haven't saved any personal study notes for this course yet.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Quizzes -->
+        <div class="card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Course Quizzes</h3>
+                <span class="badge badge-secondary">{{ course.quizzes|length }}</span>
+            </div>
+            {% if course.quizzes %}
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for q in course.quizzes %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div>
+                            <strong style="color: var(--text-main); font-size: 0.9rem;">{{ q.title }}</strong>
+                            <div class="text-xs text-muted">Passing score: {{ q.passing_score }}% &bull; {{ q.questions|length }} questions</div>
+                        </div>
+                        <div>
+                            {% if current_user.role == 'tutor' or current_user.role == 'admin' %}
+                                <a href="{{ url_for('tutor.add_question', quiz_id=q.id) }}" class="btn btn-outline btn-sm">
+                                    + Question
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('student.take_quiz', quiz_id=q.id) }}" class="btn btn-primary btn-sm">
+                                    Take Quiz
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted">No quizzes published for this course yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Offline Download Materials, Live Sessions & Recordings, Reviews -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Materials List with Offline Download Indicator -->
+        <div class="card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Course Materials</h3>
+                <span class="badge badge-success"><i class="fas fa-download" aria-hidden="true"></i> Offline Available</span>
+            </div>
+
+            {% if course.materials %}
+                <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                    {% for material in course.materials %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div style="display: flex; align-items: center; gap: 0.6rem; overflow: hidden;">
+                            <div class="stat-icon stat-icon-indigo" style="width: 32px; height: 32px; font-size: 0.85rem; flex-shrink: 0;">
+                                <i class="fas fa-file-alt" aria-hidden="true"></i>
+                            </div>
+                            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; font-weight: 600;">
+                                {{ material.file_name }}
+                            </div>
+                        </div>
+                        <a href="{{ url_for('tutor.handle_download_material', material_id=material.id, as_attachment=True) }}" class="btn btn-outline-primary btn-sm" style="flex-shrink: 0;" title="Download for offline access">
+                            <i class="fas fa-download" aria-hidden="true"></i> Download
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted">No materials attached.</p>
+            {% endif %}
+        </div>
+
+        <!-- Live Sessions & Auto-Saved Session Recordings -->
+        <div class="card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Live Classes & Recordings</h3>
+            {% if course.live_sessions %}
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for s in course.live_sessions %}
+                    <div style="padding: 0.85rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.2rem;">
+                            <strong style="color: var(--text-main); font-size: 0.875rem;">{{ s.title }}</strong>
+                            {% set is_past = s.scheduled_at < now() %}
+                            {% if is_past %}
+                                <span class="badge badge-danger" style="font-size: 0.65rem;">Past</span>
+                            {% else %}
+                                <span class="badge badge-success" style="font-size: 0.65rem;">Upcoming</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-muted" style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-calendar-day text-amber" aria-hidden="true"></i> {{ s.scheduled_at.strftime('%b %d at %I:%M %p') }}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            {% if not is_past %}
+                            <a href="{{ s.meeting_link }}" target="_blank" class="btn btn-secondary btn-sm" style="flex: 1;">
+                                <i class="fas fa-video" aria-hidden="true"></i> Join Class
+                            </a>
+                            {% endif %}
+                            {% if s.recording_link %}
+                            <a href="{{ s.recording_link }}" target="_blank" class="btn btn-primary btn-sm" style="flex: 1;" title="Rewatch live session recording">
+                                <i class="fas fa-play-circle" aria-hidden="true"></i> Watch Recording
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% if current_user.id == course.tutor_id or current_user.role == 'admin' %}
+                        <div style="display: flex; gap: 0.4rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">
+                            <a href="{{ url_for('engagement.edit_live_session', session_id=s.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                                <i class="fas fa-edit" aria-hidden="true"></i> Edit
+                            </a>
+                            <form action="{{ url_for('engagement.delete_live_session', session_id=s.id) }}" method="POST" style="flex: 1; margin: 0;" onsubmit="return confirm('Delete this session?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm btn-block">
+                                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted">No upcoming live sessions or recordings.</p>
+            {% endif %}
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Student Reviews ({{ course.reviews|length }})</h3>
+            {% if current_user.role == 'student' and enrollment %}
+            <!-- Leave Review Form -->
+            <form action="{{ url_for('engagement.submit_review', course_id=course.id) }}" method="POST" style="margin-bottom: 1.25rem; background: var(--surface-subtle); padding: 1.15rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                {{ review_form.hidden_tag() }}
+                <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">Leave a Review</h4>
+                <div style="margin-bottom: 0.75rem;">
+                    {{ review_form.rating.label(class="form-label") }}
+                    {{ review_form.rating(class="form-control") }}
+                </div>
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                    {{ review_form.comment(class="form-control", placeholder="Write your course review...", rows=2) }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    Submit Review
+                </button>
+            </form>
+            {% endif %}
+
+            <!-- Existing Reviews List -->
+            {% if course.reviews %}
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for r in course.reviews %}
+                    <div style="padding: 0.85rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                            <strong style="color: var(--text-main); font-size: 0.875rem;">{{ r.student.username }}</strong>
+                            <span class="badge badge-warning">{{ r.rating }} / 5</span>
+                        </div>
+                        <p class="text-xs text-muted" style="margin: 0;">{{ r.comment or 'No written text review.' }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-xs text-muted">No reviews left yet for this course.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

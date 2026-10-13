@@ -1,0 +1,33 @@
+<!-- Language Selector Dropdown -->
+<div class="language-selector" role="navigation" aria-label="Language selection">
+    <div class="lang-dropdown">
+        <button class="lang-toggle" id="lang-toggle" aria-expanded="false" aria-haspopup="true" aria-label="Change language">
+            <i class="fas fa-globe"></i>
+            <span class="lang-current">{{ get_locale() | default('en') | upper }}</span>
+            <i class="fas fa-chevron-down" style="font-size: 0.65rem;"></i>
+        </button>
+        <ul class="lang-menu" id="lang-menu" role="menu" aria-label="Available languages">
+            <li role="menuitem"><a href="{{ url_for('home.set_language', lang='en') }}" class="lang-option {{ 'active' if get_locale()|default('en') == 'en' else '' }}">🇺🇸 English</a></li>
+            <li role="menuitem"><a href="{{ url_for('home.set_language', lang='hi') }}" class="lang-option {{ 'active' if get_locale()|default('en') == 'hi' else '' }}">🇮🇳 हिन्दी</a></li>
+            <li role="menuitem"><a href="{{ url_for('home.set_language', lang='es') }}" class="lang-option {{ 'active' if get_locale()|default('en') == 'es' else '' }}">🇪🇸 Español</a></li>
+            <li role="menuitem"><a href="{{ url_for('home.set_language', lang='fr') }}" class="lang-option {{ 'active' if get_locale()|default('en') == 'fr' else '' }}">🇫🇷 Français</a></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+(function() {
+    const toggle = document.getElementById('lang-toggle');
+    const menu = document.getElementById('lang-menu');
+    if (!toggle || !menu) return;
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = menu.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', () => {
+        menu.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+    });
+})();
+</script>

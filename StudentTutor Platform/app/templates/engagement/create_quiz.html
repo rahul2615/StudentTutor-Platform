@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Quiz — {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 600px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">Create Quiz</h1>
+        <p class="page-subtitle">For course "{{ course.title }}"</p>
+    </div>
+    <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline">
+        &larr; Course
+    </a>
+</div>
+
+<div class="form-wrapper" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control", placeholder="e.g., Module 1 Quiz: Syntax Basics") }}
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            {{ form.passing_score.label(class="form-label") }}
+            {{ form.passing_score(class="form-control") }}
+            <div class="form-hint">Percentage required to pass (e.g. 70%)</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+            Next: Add Questions &rarr;
+        </button>
+    </form>
+</div>
+{% endblock %}

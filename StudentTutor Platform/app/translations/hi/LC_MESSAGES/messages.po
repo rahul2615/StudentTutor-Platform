@@ -1,0 +1,91 @@
+# Hindi translations for EduConnect
+# Copyright (C) 2025 EduConnect
+msgid ""
+msgstr ""
+"Language: hi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+msgid "Browse Courses"
+msgstr "पाठ्यक्रम खोजें"
+
+msgid "Wishlist"
+msgstr "इच्छा सूची"
+
+msgid "Create Course"
+msgstr "पाठ्यक्रम बनाएं"
+
+msgid "All Courses"
+msgstr "सभी पाठ्यक्रम"
+
+msgid "Overview"
+msgstr "अवलोकन"
+
+msgid "Tutors"
+msgstr "शिक्षक"
+
+msgid "Courses"
+msgstr "पाठ्यक्रम"
+
+msgid "Manage Users"
+msgstr "उपयोगकर्ता प्रबंधन"
+
+msgid "Analytics"
+msgstr "विश्लेषिकी"
+
+msgid "Audit Log"
+msgstr "ऑडिट लॉग"
+
+msgid "Content Flags"
+msgstr "सामग्री फ़्लैग"
+
+msgid "Schedule"
+msgstr "कार्यक्रम"
+
+msgid "Messages"
+msgstr "संदेश"
+
+msgid "Leaderboard"
+msgstr "लीडरबोर्ड"
+
+msgid "Logout"
+msgstr "लॉग आउट"
+
+msgid "Sign In"
+msgstr "साइन इन"
+
+msgid "Join Platform"
+msgstr "प्लेटफ़ॉर्म से जुड़ें"
+
+msgid "Home"
+msgstr "होम"
+
+msgid "Login successful!"
+msgstr "लॉगिन सफल!"
+
+msgid "Registration successful!"
+msgstr "पंजीकरण सफल!"
+
+msgid "Profile updated successfully!"
+msgstr "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई!"
+
+msgid "Enroll"
+msgstr "नामांकन करें"
+
+msgid "Unenroll"
+msgstr "नामांकन रद्द करें"
+
+msgid "Submit"
+msgstr "जमा करें"
+
+msgid "Search"
+msgstr "खोजें"
+
+msgid "Settings"
+msgstr "सेटिंग्स"
+
+msgid "Language"
+msgstr "भाषा"

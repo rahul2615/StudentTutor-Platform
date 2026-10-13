@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Dev Payment Simulator — EduConnect{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 3rem auto; padding: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <span class="badge badge-warning" style="font-size: 0.85rem;"><i class="fas fa-flask"></i> Sandbox Test Mode</span>
+        <h2 style="font-size: 1.3rem; font-weight: 700; margin: 0;">Payment Simulator</h2>
+    </div>
+
+    <p class="text-xs text-muted" style="margin-bottom: 1.5rem; line-height: 1.5;">
+        Since <code>STRIPE_SECRET_KEY</code> is not configured in your <code>.env</code>, you are using the local sandbox payment simulator. Choose an outcome below to test the end-to-end payment workflow:
+    </p>
+
+    <div style="background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <div><strong>Order ID:</strong> #{{ payment.id }}</div>
+        <div><strong>Course:</strong> {{ payment.course.title }}</div>
+        <div><strong>Amount:</strong> <span class="text-primary font-bold">{{ "%.2f"|format(payment.amount) }} {{ payment.currency.upper() }}</span></div>
+        <div><strong>Student:</strong> {{ payment.student.username }}</div>
+    </div>
+
+    <form method="POST" style="display: flex; gap: 1rem;">
+        <button type="submit" name="action" value="success" class="btn btn-success btn-lg" style="flex: 1;">
+            <i class="fas fa-check-circle"></i> Simulate Success
+        </button>
+        <button type="submit" name="action" value="fail" class="btn btn-danger btn-lg" style="flex: 1;">
+            <i class="fas fa-times-circle"></i> Simulate Failure
+        </button>
+    </form>
+</div>
+{% endblock %}

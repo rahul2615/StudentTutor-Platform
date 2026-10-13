@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard — EduConnect{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner Header -->
+<div class="welcome-banner animate-fade-in-up">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-primary" style="margin-bottom: 0.5rem;">
+                <i class="fas fa-user-graduate" aria-hidden="true"></i> Student Portal
+            </span>
+            <h1>Welcome back, {{ current_user.username }}!</h1>
+            <p>Track your enrolled courses and continue your learning journey.</p>
+        </div>
+        <a href="{{ url_for('student.courses') }}" class="btn btn-primary btn-lg" id="btn-browse-courses-dash">
+            Browse Catalog <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Animated KPI Counters -->
+{% set enrollments = enrollments_pagination.items if enrollments_pagination else [] %}
+
+<div class="kpi-grid animate-fade-in-up">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-indigo">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_enrolled if total_enrolled is defined else enrollments|length }}">{{ total_enrolled if total_enrolled is defined else enrollments|length }}</div>
+            <div class="kpi-label">Active Courses</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-emerald">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ completed_count if completed_count is defined else 0 }}">{{ completed_count if completed_count is defined else 0 }}</div>
+            <div class="kpi-label">Completed Courses</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-coins" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ current_user.points }}">{{ current_user.points }}</div>
+            <div class="kpi-label">Learning Points</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-coral">
+            <i class="fas fa-fire" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ current_user.streak_days }}">{{ current_user.streak_days }}</div>
+            <div class="kpi-label">Streak Days</div>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription Pass Banner -->
+<div class="card animate-fade-in-up" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem;">
+    {% if current_user.has_active_subscription() %}
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-emerald" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div>
+                    <strong style="font-size: 1rem; color: var(--text-main); display: block;">EduConnect Pass — Unlimited Active Plan</strong>
+                    <span class="text-xs text-muted">You have full access to all courses, quizzes, and live classes.</span>
+                </div>
+            </div>
+            <a href="{{ url_for('payment.pricing') }}" class="btn btn-outline-primary btn-sm">Manage Subscription</a>
+        </div>
+    {% else %}
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-purple" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div>
+                    <strong style="font-size: 1rem; color: var(--text-main); display: block;">Unlock Unlimited Learning</strong>
+                    <span class="text-xs text-muted">Get EduConnect Pass for $19.99/mo to access every course on the platform.</span>
+                </div>
+            </div>
+            <a href="{{ url_for('payment.pricing') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-crown"></i> View Unlimited Pass
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Continue Where You Left Off Quick Banner -->
+{% if enrollments and enrollments[0] %}
+{% set last_active = enrollments[0] %}
+<div class="card animate-fade-in-up" style="padding: 1.25rem 1.5rem; margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div class="text-xs text-primary font-bold" style="text-transform: uppercase; letter-spacing: 0.04em;">
+                <i class="fas fa-history" aria-hidden="true"></i> Continue Learning
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0.2rem 0;">{{ last_active.course.title }}</h3>
+            <p class="text-xs text-muted" style="margin: 0;">
+                Module: <strong>{{ last_active.last_accessed_module or 'Overview' }}</strong> &bull; Progress: <strong>{{ last_active.progress }}%</strong>
+            </p>
+        </div>
+        <a href="{{ url_for('tutor.course_details', course_id=last_active.course.id) }}" class="btn btn-primary btn-sm">
+            Resume Course <i class="fas fa-play" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Section Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">My Enrolled Courses</h2>
+        <p class="page-subtitle">Courses you are actively taking</p>
+    </div>
+</div>
+
+<!-- Enrolled Courses Grid or Animated Empty State -->
+{% if enrollments %}
+    <div class="grid-courses animate-stagger">
+        {% for enrollment in enrollments %}
+        {% set course = enrollment.course %}
+        <div class="course-card">
+            <div class="course-card-body">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 class="course-card-title">{{ course.title }}</h3>
+                    {% if enrollment.status == 'completed' or enrollment.progress >= 100 %}
+                        <span class="badge badge-success"><i class="fas fa-award" aria-hidden="true"></i> Completed</span>
+                    {% else %}
+                        <span class="badge badge-info"><i class="fas fa-play-circle" aria-hidden="true"></i> Active</span>
+                    {% endif %}
+                </div>
+                <p class="course-card-desc">{{ course.description }}</p>
+
+                <!-- Animated Progress Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <span class="text-xs text-muted font-semibold">Progress</span>
+                        <span class="text-xs font-bold text-primary">{{ enrollment.progress }}%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ enrollment.progress }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="course-meta">
+                    <div class="course-meta-item">
+                        <i class="fas fa-chalkboard-teacher text-primary" aria-hidden="true"></i>
+                        <span>Tutor: <strong>{{ course.tutor.username }}</strong></span>
+                    </div>
+                    {% if course.duration %}
+                    <div class="course-meta-item">
+                        <i class="fas fa-clock text-amber" aria-hidden="true"></i>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="course-card-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline-primary btn-sm">
+                    View Course
+                </a>
+                {% if enrollment.progress >= 100 %}
+                    <a href="{{ url_for('student.view_certificate', course_id=course.id) }}" class="btn btn-success btn-sm" target="_blank">
+                        Certificate
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state animate-fade-in-up">
+        <div class="empty-state-icon">
+            <i class="fas fa-book-reader" aria-hidden="true"></i>
+        </div>
+        <h3 class="empty-state-title">No courses yet — explore what's available</h3>
+        <p class="empty-state-desc">You haven't enrolled in any courses yet. Discover verified courses taught by top tutors!</p>
+        <a href="{{ url_for('student.courses') }}" class="btn btn-primary btn-lg">
+            Explore Courses <i class="fas fa-compass" aria-hidden="true"></i>
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

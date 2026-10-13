@@ -1,0 +1,90 @@
+# French translations for EduConnect
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+msgid "Browse Courses"
+msgstr "Parcourir les cours"
+
+msgid "Wishlist"
+msgstr "Liste de souhaits"
+
+msgid "Create Course"
+msgstr "Créer un cours"
+
+msgid "All Courses"
+msgstr "Tous les cours"
+
+msgid "Overview"
+msgstr "Vue d'ensemble"
+
+msgid "Tutors"
+msgstr "Tuteurs"
+
+msgid "Courses"
+msgstr "Cours"
+
+msgid "Manage Users"
+msgstr "Gérer les utilisateurs"
+
+msgid "Analytics"
+msgstr "Analytique"
+
+msgid "Audit Log"
+msgstr "Journal d'audit"
+
+msgid "Content Flags"
+msgstr "Contenu signalé"
+
+msgid "Schedule"
+msgstr "Emploi du temps"
+
+msgid "Messages"
+msgstr "Messages"
+
+msgid "Leaderboard"
+msgstr "Classement"
+
+msgid "Logout"
+msgstr "Déconnexion"
+
+msgid "Sign In"
+msgstr "Se connecter"
+
+msgid "Join Platform"
+msgstr "Rejoindre la plateforme"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Login successful!"
+msgstr "Connexion réussie !"
+
+msgid "Registration successful!"
+msgstr "Inscription réussie !"
+
+msgid "Profile updated successfully!"
+msgstr "Profil mis à jour avec succès !"
+
+msgid "Enroll"
+msgstr "S'inscrire"
+
+msgid "Unenroll"
+msgstr "Se désinscrire"
+
+msgid "Submit"
+msgstr "Soumettre"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Language"
+msgstr "Langue"

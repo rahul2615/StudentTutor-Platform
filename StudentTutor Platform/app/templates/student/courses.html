@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Courses — EduConnect{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header animate-fade-in-up">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-compass text-primary" aria-hidden="true"></i> Browse Courses
+        </h1>
+        <p class="page-subtitle">Discover approved subjects taught by vetted tutors</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline">
+        &larr; Dashboard
+    </a>
+</div>
+
+<!-- Search & Category & Level Filters -->
+<div class="card animate-fade-in-up" style="padding: 1.25rem; margin-bottom: 2rem;">
+    <form method="GET" action="{{ url_for('student.courses') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <div class="input-icon-group" style="flex: 2; min-width: 200px;">
+            <input type="text" name="search" class="form-control" placeholder="Search by title, tutor or keyword..." value="{{ search_query or '' }}">
+            <i class="fas fa-search" aria-hidden="true"></i>
+        </div>
+
+        <div style="flex: 1; min-width: 150px;">
+            <select name="category" class="form-control" onchange="this.form.submit();">
+                <option value="All" {% if not selected_category or selected_category == 'All' %}selected{% endif %}>All Categories</option>
+                <option value="Computer Science" {% if selected_category == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+                <option value="Mathematics" {% if selected_category == 'Mathematics' %}selected{% endif %}>Mathematics</option>
+                <option value="Science" {% if selected_category == 'Science' %}selected{% endif %}>Science & Tech</option>
+                <option value="Languages" {% if selected_category == 'Languages' %}selected{% endif %}>Languages</option>
+                <option value="Business" {% if selected_category == 'Business' %}selected{% endif %}>Business</option>
+                <option value="Arts" {% if selected_category == 'Arts' %}selected{% endif %}>Arts & Humanities</option>
+                <option value="General" {% if selected_category == 'General' %}selected{% endif %}>General</option>
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 140px;">
+            <select name="level" class="form-control" onchange="this.form.submit();">
+                <option value="All" {% if not selected_level or selected_level == 'All' %}selected{% endif %}>All Levels</option>
+                <option value="Beginner" {% if selected_level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                <option value="Intermediate" {% if selected_level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                <option value="Advanced" {% if selected_level == 'Advanced' %}selected{% endif %}>Advanced</option>
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 140px;">
+            <select name="tutor_id" class="form-control" onchange="this.form.submit();">
+                <option value="">All Tutors</option>
+                {% for tutor in tutors %}
+                <option value="{{ tutor.id }}" {% if selected_tutor_id == tutor.id %}selected{% endif %}>{{ tutor.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Filter
+        </button>
+        {% if search_query or selected_category or selected_level or selected_tutor_id %}
+            <a href="{{ url_for('student.courses') }}" class="btn btn-outline">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Courses Grid with Staggered Entrance Animation -->
+{% set courses = courses_pagination.items if courses_pagination else [] %}
+{% if courses %}
+    <div class="grid-courses animate-stagger">
+        {% for course in courses %}
+        {% set is_enrolled = current_user.is_enrolled_in(course.id) %}
+        <div class="course-card">
+            <div class="course-card-body">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 class="course-card-title">{{ course.title }}</h3>
+                    {% if is_enrolled %}
+                        <span class="badge badge-success"><i class="fas fa-check" aria-hidden="true"></i> Enrolled</span>
+                    {% else %}
+                        <span class="badge badge-purple">{{ course.category }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Level Badge -->
+                <div style="margin-bottom: 0.75rem;">
+                    {% if course.level == 'Beginner' %}
+                        <span class="badge badge-info"><i class="fas fa-seedling" aria-hidden="true"></i> Beginner</span>
+                    {% elif course.level == 'Intermediate' %}
+                        <span class="badge badge-warning"><i class="fas fa-layer-group" aria-hidden="true"></i> Intermediate</span>
+                    {% else %}
+                        <span class="badge badge-purple"><i class="fas fa-mountain" aria-hidden="true"></i> Advanced</span>
+                    {% endif %}
+                </div>
+
+                <p class="course-card-desc">{{ course.description }}</p>
+
+                <div class="course-meta">
+                    <div class="course-meta-item">
+                        <i class="fas fa-chalkboard-teacher text-primary" aria-hidden="true"></i>
+                        <span>Tutor: <strong>{{ course.tutor.username }}</strong>
+                        {% if course.tutor.is_verified %}
+                            <i class="fas fa-check-circle text-primary" title="Verified Tutor" aria-hidden="true"></i>
+                        {% endif %}
+                        </span>
+                    </div>
+                    {% if course.duration %}
+                    <div class="course-meta-item">
+                        <i class="fas fa-clock text-amber" aria-hidden="true"></i>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="course-meta-item">
+                        <i class="fas fa-users text-emerald" aria-hidden="true"></i>
+                        <span>{{ course.student_count }} student{% if course.student_count != 1 %}s{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="course-card-footer" style="display: flex; gap: 0.75rem; align-items: center;">
+                <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                    Details
+                </a>
+                {% if is_enrolled %}
+                    <form action="{{ url_for('student.unenroll', course_id=course.id) }}" method="POST" style="flex: 1; margin: 0;" onsubmit="return confirm('Unenroll from {{ course.title }}?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm btn-block">
+                            Unenroll
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('student.enroll', course_id=course.id) }}" method="POST" style="flex: 1; margin: 0;">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            Enroll
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if courses_pagination and courses_pagination.pages > 1 %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2.5rem;">
+        {% if courses_pagination.has_prev %}
+            <a href="{{ url_for('student.courses', page=courses_pagination.prev_num, search=search_query, category=selected_category, level=selected_level, tutor_id=selected_tutor_id) }}" class="btn btn-outline btn-sm">
+                &larr; Previous
+            </a>
+        {% endif %}
+
+        <span class="text-xs font-semibold text-muted" style="padding: 0 0.5rem;">
+            Page {{ courses_pagination.page }} of {{ courses_pagination.pages }}
+        </span>
+
+        {% if courses_pagination.has_next %}
+            <a href="{{ url_for('student.courses', page=courses_pagination.next_num, search=search_query, category=selected_category, level=selected_level, tutor_id=selected_tutor_id) }}" class="btn btn-outline btn-sm">
+                Next &rarr;
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+{% else %}
+    <div class="empty-state animate-fade-in-up">
+        <div class="empty-state-icon">
+            <i class="fas fa-search" aria-hidden="true"></i>
+        </div>
+        <h3 class="empty-state-title">No matching courses found</h3>
+        <p class="empty-state-desc">Try adjusting your difficulty level or category filter to browse available offerings.</p>
+        <a href="{{ url_for('student.courses') }}" class="btn btn-outline">Clear Filters</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 600px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">Edit Profile</h1>
+        <p class="page-subtitle">Update your details and password</p>
+    </div>
+    <a href="{{ url_for('auth.profile') }}" class="btn btn-outline">
+        Back to Profile
+    </a>
+</div>
+
+<div class="form-wrapper" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <!-- Email Address -->
+        <div class="form-group">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", placeholder="your.name@example.com") }}
+            <div class="form-hint">Used for password resets and updates.</div>
+        </div>
+
+        <!-- Bio / About Me -->
+        <div class="form-group">
+            {{ form.bio.label(class="form-label") }}
+            {{ form.bio(class="form-control", placeholder="Tell students or tutors about yourself...", rows=4) }}
+        </div>
+
+        <!-- Profile Picture Upload -->
+        <div class="form-group">
+            {{ form.profile_pic.label(class="form-label") }}
+            <div style="background-color: var(--surface-subtle); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed var(--border);">
+                {{ form.profile_pic(class="form-control", style="background: white;") }}
+                <div class="form-hint" style="margin-top: 0.35rem;">Supported formats: JPG, PNG, WebP.</div>
+            </div>
+        </div>
+
+        <hr style="margin: 1.75rem 0; border: none; border-top: 1px solid var(--border);">
+
+        <h3 style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1rem;">Change Password</h3>
+
+        <!-- Current Password -->
+        <div class="form-group">
+            {{ form.current_password.label(class="form-label") }}
+            {{ form.current_password(class="form-control", placeholder="Current password") }}
+        </div>
+
+        <!-- New Password -->
+        <div class="form-group">
+            {{ form.new_password.label(class="form-label") }}
+            {{ form.new_password(class="form-control", placeholder="New password (min 6 characters)") }}
+        </div>
+
+        <!-- Confirm New Password -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+            {{ form.confirm_password.label(class="form-label") }}
+            {{ form.confirm_password(class="form-control", placeholder="Confirm new password") }}
+        </div>
+
+        <!-- Submit & Cancel Buttons -->
+        <div style="display: flex; gap: 0.85rem;">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                Save Changes
+            </button>
+            <a href="{{ url_for('auth.profile') }}" class="btn btn-outline btn-lg">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

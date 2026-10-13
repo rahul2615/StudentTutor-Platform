@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat with {{ other_user.username }} — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 720px; margin: 0 auto 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ url_for('engagement.inbox') }}" class="btn btn-outline btn-sm">
+            &larr; Inbox
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            {% if other_user.profile_pic %}
+                <img src="{{ url_for('static', filename=other_user.profile_pic) }}" alt="" style="width: 36px; height: 36px; border-radius: var(--radius-full); object-fit: cover;">
+            {% else %}
+                <div class="nav-user-avatar" style="width: 36px; height: 36px;">
+                    {{ other_user.username[0]|upper }}
+                </div>
+            {% endif %}
+            <div>
+                <h2 style="font-size: 1.15rem; font-weight: 600; margin: 0;">{{ other_user.username }}</h2>
+                <span class="badge badge-secondary" style="font-size: 0.7rem;">
+                    {{ other_user.role|capitalize }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; height: 58vh;">
+    <!-- Message Stream -->
+    <div style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem;" id="messageStream">
+        {% if messages %}
+            {% for msg in messages %}
+            {% set is_me = (msg.sender_id == current_user.id) %}
+            <div style="display: flex; justify-content: {% if is_me %}flex-end{% else %}flex-start{% endif %};">
+                <div style="max-width: 70%; padding: 0.75rem 1rem; border-radius: var(--radius); {% if is_me %}background: var(--primary); color: #FFFFFF; border-bottom-right-radius: 2px;{% else %}background: var(--surface-subtle); color: var(--text-main); border: 1px solid var(--border); border-bottom-left-radius: 2px;{% endif %}">
+                    <div style="font-size: 0.9rem; line-height: 1.45; white-space: pre-line;">{{ msg.content }}</div>
+                    <div style="font-size: 0.7rem; margin-top: 0.3rem; text-align: right; opacity: 0.75;">
+                        {{ msg.timestamp.strftime('%I:%M %p') }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state" style="margin: auto; border: none; background: transparent;">
+                <h3 class="empty-state-title" style="font-size: 1rem;">No messages yet</h3>
+                <p class="empty-state-desc" style="font-size: 0.85rem;">Send a greeting to start chatting.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Message Input Bar -->
+    <div style="padding: 1rem; border-top: 1px solid var(--border); background: var(--surface);">
+        <form method="POST" style="display: flex; gap: 0.75rem;">
+            {{ form.hidden_tag() }}
+            {{ form.content(class="form-control", placeholder="Type a message...", rows=1, style="resize: none;") }}
+            <button type="submit" class="btn btn-primary">
+                Send
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const stream = document.getElementById('messageStream');
+    if (stream) stream.scrollTop = stream.scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 680px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">Direct Messages</h1>
+        <p class="page-subtitle">Private student-tutor conversations</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 680px; margin: 0 auto; padding: 0.5rem;">
+    {% if chat_users %}
+        <div style="display: flex; flex-direction: column;">
+            {% for user in chat_users %}
+            <a href="{{ url_for('engagement.chat_thread', user_id=user.id) }}" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: background 0.15s ease;" onmouseover="this.style.background='var(--surface-subtle)'" onmouseout="this.style.background='transparent'">
+                <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    {% if user.profile_pic %}
+                        <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="" style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover;">
+                    {% else %}
+                        <div class="nav-user-avatar" style="width: 40px; height: 40px; font-size: 1rem;">
+                            {{ user.username[0]|upper }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">{{ user.username }}</div>
+                        <div class="text-xs text-muted" style="text-transform: capitalize;">
+                            {{ user.role }}
+                        </div>
+                    </div>
+                </div>
+                <div class="btn btn-outline btn-sm">
+                    Open Chat
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state" style="padding: 2.5rem 1.5rem;">
+            <div class="empty-state-icon">
+                <i class="fas fa-comments" aria-hidden="true"></i>
+            </div>
+            <h3 class="empty-state-title">No conversations yet</h3>
+            <p class="empty-state-desc">You can start a chat directly from any course page or instructor profile.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

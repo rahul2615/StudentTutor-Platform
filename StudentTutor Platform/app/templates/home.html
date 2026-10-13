@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}EduConnect — Learn from Experts & Share Knowledge{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div style="padding: 3.5rem 1rem 3rem; text-align: center; max-width: 760px; margin: 0 auto;" class="animate-fade-in-up">
+    <span class="badge badge-purple" style="margin-bottom: 1.25rem; padding: 0.45rem 1rem; font-size: 0.85rem;">
+        <i class="fas fa-sparkles" aria-hidden="true"></i> Interactive Online Tutoring
+    </span>
+    <h1 style="font-size: 2.65rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; color: var(--text-main);">
+        Learn from expert tutors, or build your teaching career
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem;">
+        Connect with verified instructors, access rich learning materials, take interactive quizzes, and earn certificates on a simple, vibrant platform.
+    </p>
+
+    {% if not current_user.is_authenticated %}
+        <div style="display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg" id="hero-cta-register">
+                Get Started Free <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-lg" id="hero-cta-login">
+                Sign In
+            </a>
+        </div>
+    {% else %}
+        <div style="display: flex; justify-content: center;">
+            <a href="{{ url_for(current_user.role + '.dashboard') }}" class="btn btn-primary btn-lg" id="hero-cta-dashboard">
+                Go to Dashboard <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Animated Stats Counter Strip -->
+<div class="kpi-grid animate-fade-in-up" style="margin: 2.5rem 0 3.5rem;">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-indigo">
+            <i class="fas fa-book-reader" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_courses }}">{{ total_courses }}</div>
+            <div class="kpi-label">Active Courses</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-emerald">
+            <i class="fas fa-user-graduate" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_students }}">{{ total_students }}</div>
+            <div class="kpi-label">Enrolled Students</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_tutors }}">{{ total_tutors }}</div>
+            <div class="kpi-label">Verified Tutors</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-purple">
+            <i class="fas fa-award" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_certificates }}">{{ total_certificates }}</div>
+            <div class="kpi-label">Certificates Awarded</div>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Featured Courses Showcase -->
+{% if featured_courses %}
+<div style="padding: 2.5rem 0 2rem; border-top: 1px solid var(--border);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.2rem;">Featured Courses</h2>
+            <p class="text-muted" style="margin: 0;">Explore top courses created by expert tutors</p>
+        </div>
+        <a href="{{ url_for('student.courses') }}" class="btn btn-outline-primary btn-sm">
+            View All Catalog &rarr;
+        </a>
+    </div>
+
+    <div class="grid-courses animate-stagger">
+        {% for course in featured_courses %}
+        <div class="course-card">
+            <div class="course-card-body">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 class="course-card-title">{{ course.title }}</h3>
+                    <span class="badge badge-purple">{{ course.category }}</span>
+                </div>
+                <p class="course-card-desc">{{ course.description }}</p>
+                <div class="course-meta">
+                    <div class="course-meta-item">
+                        <i class="fas fa-chalkboard-teacher text-primary" aria-hidden="true"></i>
+                        <span>Tutor: <strong>{{ course.tutor.username }}</strong></span>
+                    </div>
+                    <div class="course-meta-item">
+                        <i class="fas fa-users text-emerald" aria-hidden="true"></i>
+                        <span>{{ course.student_count }} student{% if course.student_count != 1 %}s{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                {% if course.is_free %}
+                    <span class="badge badge-success">FREE</span>
+                {% else %}
+                    <span class="text-primary font-bold">${{ "%.2f"|format(course.price) }} {{ course.currency.upper() }}</span>
+                {% endif %}
+                <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-primary btn-sm">
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- How It Works (3 Steps) -->
+<div style="padding-top: 2.5rem; border-top: 1px solid var(--border);">
+    <div class="text-center" style="margin-bottom: 2.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 800;">How it works</h2>
+        <p class="text-muted" style="margin-top: 0.35rem;">Three simple steps to start learning or teaching</p>
+    </div>
+
+    <div class="grid-3 animate-stagger">
+        <!-- Step 1 -->
+        <div class="card card-interactive" style="padding: 2rem; text-align: center;">
+            <div class="stat-icon stat-icon-indigo" style="margin: 0 auto 1.25rem; width: 56px; height: 56px; font-size: 1.4rem;">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">1. Create an Account</h3>
+            <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5;">
+                Join as a student to enroll in subjects or apply as a tutor to publish your own courses.
+            </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="card card-interactive" style="padding: 2rem; text-align: center;">
+            <div class="stat-icon stat-icon-emerald" style="margin: 0 auto 1.25rem; width: 56px; height: 56px; font-size: 1.4rem;">
+                <i class="fas fa-compass" aria-hidden="true"></i>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">2. Browse & Enroll</h3>
+            <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5;">
+                Explore verified subjects, download course materials, and participate in direct Q&A forums.
+            </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="card card-interactive" style="padding: 2rem; text-align: center;">
+            <div class="stat-icon stat-icon-coral" style="margin: 0 auto 1.25rem; width: 56px; height: 56px; font-size: 1.4rem;">
+                <i class="fas fa-trophy" aria-hidden="true"></i>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">3. Learn & Excel</h3>
+            <p class="text-muted" style="font-size: 0.875rem; line-height: 1.5;">
+                Take quizzes, track your completion progress, earn leaderboard points, and get certified.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

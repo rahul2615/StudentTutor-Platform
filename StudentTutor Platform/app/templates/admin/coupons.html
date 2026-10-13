@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Coupon Management — Admin Studio{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Coupon Codes</h1>
+        <p class="page-subtitle">Create and manage discount codes for courses</p>
+    </div>
+    <a href="{{ url_for('admin.create_coupon') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Coupon
+    </a>
+</div>
+
+<div class="card" style="padding: 1.5rem;">
+    {% if coupons %}
+        <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; font-size: 0.9rem;">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Usage</th>
+                        <th>Applicable Course</th>
+                        <th>Valid Period</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in coupons %}
+                    <tr>
+                        <td>
+                            <strong style="font-size: 1rem; color: var(--primary); font-family: monospace;">{{ c.code }}</strong>
+                        </td>
+                        <td>
+                            {% if c.discount_type == 'percentage' %}
+                                <span class="badge badge-purple">{{ "%.0f"|format(c.discount_value) }}% OFF</span>
+                            {% else %}
+                                <span class="badge badge-emerald">${{ "%.2f"|format(c.discount_value) }} OFF</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ c.times_used }} / {{ c.max_uses if c.max_uses is not none else '∞' }}
+                        </td>
+                        <td>
+                            {% if c.course %}
+                                <span class="text-xs">{{ c.course.title }}</span>
+                            {% else %}
+                                <span class="badge badge-secondary">All Courses</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-xs text-muted">
+                            {% if c.valid_from %}{{ c.valid_from.strftime('%b %d') }}{% else %}Start{% endif %}
+                            &rarr;
+                            {% if c.valid_until %}{{ c.valid_until.strftime('%b %d, %Y') }}{% else %}No Expiry{% endif %}
+                        </td>
+                        <td>
+                            {% if c.is_active %}
+                                <span class="badge badge-success">Active</span>
+                            {% else %}
+                                <span class="badge badge-danger">Disabled</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <a href="{{ url_for('admin.edit_coupon', coupon_id=c.id) }}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                <form action="{{ url_for('admin.toggle_coupon', coupon_id=c.id) }}" method="POST" style="margin: 0;">
+                                    <button type="submit" class="btn {% if c.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} btn-sm">
+                                        {% if c.is_active %}Disable{% else %}Enable{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h3 class="empty-state-title">No coupons created yet</h3>
+            <p class="empty-state-desc">Create your first coupon code to offer discounts to students.</p>
+            <a href="{{ url_for('admin.create_coupon') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Coupon
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Sign In — EduConnect{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: center; min-height: 60vh; padding: 2rem 0;">
+    <div class="form-wrapper animate-fade-in-up" style="width: 100%; max-width: 410px; margin: 0; border-top: 4px solid var(--accent-purple);">
+        <div class="text-center" style="margin-bottom: 1.75rem;">
+            <span class="badge badge-purple" style="margin-bottom: 0.75rem; padding: 0.35rem 0.8rem;">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i> Admin Access
+            </span>
+            <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.35rem;">Admin Sign In</h1>
+            <p class="text-muted" style="font-size: 0.875rem;">Sign in to access platform governance controls</p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label class="form-label" for="username">Admin Username</label>
+                <div class="input-icon-group">
+                    {{ form.username(class="form-control", id="username", placeholder="Enter admin username") }}
+                    <i class="fas fa-user-shield" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-icon-group">
+                    {{ form.password(class="form-control", id="password", placeholder="Enter password") }}
+                    <i class="fas fa-key" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="background: var(--accent-purple); border-color: var(--accent-purple);">
+                Authorize Session <i class="fas fa-lock" aria-hidden="true"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

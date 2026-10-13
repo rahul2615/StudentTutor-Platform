@@ -1,0 +1,17 @@
+Flask
+Flask-SQLAlchemy
+Flask-WTF
+Flask-Login
+Flask-Migrate
+Flask-Babel
+Flask-RESTX
+Flask-Limiter
+flask-cors
+WTForms
+Werkzeug
+google-generativeai
+python-docx
+PyPDF2
+itsdangerous
+stripe
+qrcode

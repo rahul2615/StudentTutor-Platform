@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — Admin Studio{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 600px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">Configure discount rules and usage parameters</p>
+    </div>
+    <a href="{{ url_for('admin.manage_coupons') }}" class="btn btn-outline">
+        Cancel
+    </a>
+</div>
+
+<div class="form-wrapper" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.code.label(class="form-label") }}
+            {{ form.code(class="form-control", placeholder="e.g. SUMMER20", style="text-transform: uppercase;") }}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                {{ form.discount_type.label(class="form-label") }}
+                {{ form.discount_type(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.discount_value.label(class="form-label") }}
+                {{ form.discount_value(class="form-control", placeholder="e.g. 20 for 20% or $20") }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.max_uses.label(class="form-label") }}
+            {{ form.max_uses(class="form-control", placeholder="Leave blank for unlimited uses") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.course_id.label(class="form-label") }}
+            {{ form.course_id(class="form-control") }}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                {{ form.valid_from.label(class="form-label") }}
+                {{ form.valid_from(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.valid_until.label(class="form-label") }}
+                {{ form.valid_until(class="form-control") }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">
+            Save Coupon
+        </button>
+    </form>
+</div>
+{% endblock %}

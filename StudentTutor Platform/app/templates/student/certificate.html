@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion — {{ cert.certificate_code }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+        }
+        body {
+            margin: 0;
+            padding: 2rem;
+            background: #F9FAFB;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+        }
+        .actions-bar {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+        .btn-print {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
+        }
+        .certificate-container {
+            width: 880px;
+            height: 600px;
+            background: #FFFFFF;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }
+        .cert-header {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin: 0;
+        }
+        .cert-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        .cert-name {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+        .cert-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .cert-course {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+        }
+        .cert-footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-top: 1px solid var(--border);
+            padding-top: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        @media print {
+            .actions-bar { display: none; }
+            body { padding: 0; background: #fff; }
+            .certificate-container { border: 1px solid #ccc; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="actions-bar">
+        <button onclick="window.print()" class="btn-print">
+            <i class="fas fa-print"></i> Print / Save PDF
+        </button>
+        <button onclick="window.close()" class="btn-print" style="background: #6B7280;">
+            Close Window
+        </button>
+    </div>
+
+    <div class="certificate-container">
+        <div>
+            <div style="font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem;">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1 class="cert-header">CERTIFICATE OF COMPLETION</h1>
+            <div class="cert-subtitle">EduConnect Tutoring Platform</div>
+        </div>
+
+        <div>
+            <div class="cert-text">This is proudly presented to</div>
+            <div class="cert-name">{{ cert.student.username }}</div>
+            <div class="cert-text">for successfully completing all requirements for the course</div>
+            <div class="cert-course">{{ cert.course.title }}</div>
+        </div>
+
+        <div class="cert-footer">
+            <div style="text-align: left;">
+                <div>Tutor: <strong>{{ cert.course.tutor.username }}</strong></div>
+                <div>Issue Date: <strong>{{ cert.issued_at.strftime('%B %d, %Y') }}</strong></div>
+            </div>
+            <div style="text-align: right;">
+                <div>Verification Code:</div>
+                <div style="font-family: monospace; font-weight: 700; color: var(--primary);">{{ cert.certificate_code }}</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

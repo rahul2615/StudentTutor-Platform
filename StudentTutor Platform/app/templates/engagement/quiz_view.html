@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} — Quiz{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 720px; margin: 0 auto 1.5rem;">
+    <div>
+        <a href="{{ url_for('tutor.course_details', course_id=quiz.course_id) }}" class="btn btn-outline btn-sm" style="margin-bottom: 0.75rem;">
+            &larr; Back to Course
+        </a>
+        <h1 class="page-title">{{ quiz.title }}</h1>
+        <p class="page-subtitle">Course: {{ quiz.course.title }} &bull; Passing Score: <strong>{{ quiz.passing_score }}%</strong></p>
+    </div>
+</div>
+
+<div style="max-width: 720px; margin: 0 auto;">
+    {% if quiz.questions %}
+        <form method="POST">
+            <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2rem;">
+                {% for q in quiz.questions %}
+                <div class="card" style="padding: 1.5rem;">
+                    <div style="font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 0.85rem;">
+                        <span class="text-primary" style="margin-right: 0.35rem;">Q{{ loop.index }}.</span> {{ q.prompt }}
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                            <input type="radio" name="question_{{ q.id }}" value="A" required style="accent-color: var(--primary);">
+                            <span style="font-size: 0.9rem;"><strong>A.</strong> {{ q.option_a }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                            <input type="radio" name="question_{{ q.id }}" value="B" required style="accent-color: var(--primary);">
+                            <span style="font-size: 0.9rem;"><strong>B.</strong> {{ q.option_b }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                            <input type="radio" name="question_{{ q.id }}" value="C" required style="accent-color: var(--primary);">
+                            <span style="font-size: 0.9rem;"><strong>C.</strong> {{ q.option_c }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+                            <input type="radio" name="question_{{ q.id }}" value="D" required style="accent-color: var(--primary);">
+                            <span style="font-size: 0.9rem;"><strong>D.</strong> {{ q.option_d }}</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom: 2rem;">
+                Submit Answers
+            </button>
+        </form>
+    {% else %}
+        <div class="empty-state">
+            <h3 class="empty-state-title">No questions added yet</h3>
+            <p class="empty-state-desc">The instructor has not added questions to this quiz yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

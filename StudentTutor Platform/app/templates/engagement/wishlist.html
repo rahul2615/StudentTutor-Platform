@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Saved Wishlist — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fade-in-up">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-bookmark text-primary" aria-hidden="true"></i> Saved Wishlist
+        </h1>
+        <p class="page-subtitle">Courses you have bookmarked to enroll in later</p>
+    </div>
+    <a href="{{ url_for('student.courses') }}" class="btn btn-primary">
+        Browse More Courses <i class="fas fa-compass" aria-hidden="true"></i>
+    </a>
+</div>
+
+{% set wishlist_items = current_user.wishlisted_courses.all() if current_user.wishlisted_courses else [] %}
+
+{% if wishlist_items %}
+    <div class="grid-courses animate-stagger">
+        {% for course in wishlist_items %}
+        {% set is_enrolled = current_user.is_enrolled_in(course.id) %}
+        <div class="course-card">
+            <div class="course-card-body">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 class="course-card-title">{{ course.title }}</h3>
+                    <span class="badge badge-purple">{{ course.category }}</span>
+                </div>
+                <p class="course-card-desc">{{ course.description }}</p>
+
+                <div class="course-meta">
+                    <div class="course-meta-item">
+                        <i class="fas fa-chalkboard-teacher text-primary" aria-hidden="true"></i>
+                        <span>Tutor: <strong>{{ course.tutor.username }}</strong></span>
+                    </div>
+                    {% if course.duration %}
+                    <div class="course-meta-item">
+                        <i class="fas fa-clock text-amber" aria-hidden="true"></i>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="course-card-footer" style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">
+                    Details
+                </a>
+                {% if is_enrolled %}
+                    <span class="badge badge-success" style="flex: 1; text-align: center; justify-content: center; padding: 0.5rem;">Enrolled</span>
+                {% else %}
+                    <form action="{{ url_for('student.enroll', course_id=course.id) }}" method="POST" style="flex: 1; margin: 0;">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            Enroll
+                        </button>
+                    </form>
+                {% endif %}
+                <form action="{{ url_for('engagement.toggle_wishlist', course_id=course.id) }}" method="POST" style="margin: 0;">
+                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove from wishlist">
+                        <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state animate-fade-in-up">
+        <div class="empty-state-icon">
+            <i class="fas fa-bookmark" aria-hidden="true"></i>
+        </div>
+        <h3 class="empty-state-title">Your wishlist is empty</h3>
+        <p class="empty-state-desc">Explore our course catalog and save courses to your wishlist for later access.</p>
+        <a href="{{ url_for('student.courses') }}" class="btn btn-primary btn-lg">
+            Explore Courses <i class="fas fa-compass" aria-hidden="true"></i>
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

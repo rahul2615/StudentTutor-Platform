@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout — {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 900px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title"><i class="fas fa-lock text-emerald"></i> Secure Course Checkout</h1>
+        <p class="page-subtitle">Choose your payment gateway (UPI, QR Code, or Card) and complete your order</p>
+    </div>
+    <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline">
+        &larr; Back to Course
+    </a>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 1.75rem;" class="animate-fade-in-up">
+    <!-- Main Payment Area (Left Column) -->
+    <div>
+        <!-- Payment Gateway Selection Tabs -->
+        <div class="card" style="padding: 1.75rem; border-top: 4px solid var(--primary);">
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem;">
+                <button type="button" class="btn btn-primary btn-sm" id="tab-btn-upi" onclick="switchTab('upi')" style="flex: 1; font-weight: 700;">
+                    <i class="fas fa-qrcode"></i> Pay via UPI / QR Code
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" id="tab-btn-card" onclick="switchTab('card')" style="flex: 1; font-weight: 700;">
+                    <i class="fas fa-credit-card"></i> Pay via Card / Stripe
+                </button>
+            </div>
+
+            <!-- TAB 1: UPI & QR CODE GATEWAY -->
+            <div id="tab-content-upi" style="display: block;">
+                <div style="text-align: center; margin-bottom: 1.5rem; background: var(--surface-subtle); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <span class="badge badge-emerald" style="margin-bottom: 0.5rem; font-size: 0.8rem;">
+                        <i class="fas fa-bolt"></i> Instant UPI Payment
+                    </span>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">Scan QR Code to Pay</h3>
+                    <p class="text-xs text-muted" style="margin-bottom: 1rem;">Use Google Pay, PhonePe, Paytm, BHIM, or CRED</p>
+
+                    <!-- QR Code Display -->
+                    <div style="display: inline-block; background: white; padding: 1rem; border-radius: 12px; border: 2px dashed var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                        {% if course.tutor.qr_code_path %}
+                            <img src="{{ url_for('static', filename=course.tutor.qr_code_path) }}" alt="Tutor Payment QR Code" style="width: 180px; height: 180px; object-fit: contain;">
+                        {% elif upi_qr_data_uri %}
+                            <img src="{{ upi_qr_data_uri }}" alt="Generated UPI QR Code" style="width: 180px; height: 180px;">
+                        {% else %}
+                            <div style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #6b7280; font-size: 0.8rem;">
+                                QR Code Unavailable
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- UPI ID & Mobile Deep Link Button -->
+                    <div style="margin-top: 1rem; font-size: 0.9rem;">
+                        <span class="text-muted">UPI ID:</span>
+                        <strong class="text-primary font-mono" style="font-size: 1rem; letter-spacing: 0.5px; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.6rem; border-radius: 4px;">
+                            {{ tutor_upi if tutor_upi else 'edusupport@upi' }}
+                        </strong>
+                    </div>
+
+                    {% if tutor_upi %}
+                    <div style="margin-top: 0.75rem;">
+                        <a href="upi://pay?pa={{ tutor_upi }}&pn={{ course.tutor.username }}&am={{ final_price }}&cu=INR&tn=Course_{{ course.id }}" class="btn btn-outline-primary btn-sm" style="font-size: 0.8rem;">
+                            <i class="fas fa-external-link-alt"></i> Open UPI App on Mobile
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- UPI UTR Submission Form -->
+                <form method="POST" action="{{ url_for('payment.pay_upi', course_id=course.id) }}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <input type="hidden" name="coupon_code" value="{{ applied_coupon.code if applied_coupon else '' }}">
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label class="form-label font-semibold" style="font-size: 0.9rem;">
+                            <i class="fas fa-receipt text-emerald"></i> Step 2: Enter 12-Digit UTR / Transaction Ref No.
+                        </label>
+                        <div class="input-icon-group">
+                            {{ upi_form.transaction_ref(class="form-control", placeholder="e.g. 320491827412", style="font-family: monospace; font-size: 1rem;") }}
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <div class="form-hint">Find the 12-digit UTR/Ref number in your GPay, PhonePe, or Paytm payment confirmation receipt.</div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label font-semibold" style="font-size: 0.85rem;">
+                            Upload Payment Screenshot (Optional)
+                        </label>
+                        {{ upi_form.payment_proof(class="form-control") }}
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block btn-lg" style="padding: 0.9rem; font-size: 1rem;">
+                        <i class="fas fa-check-circle"></i> Submit UPI Payment for Verification
+                    </button>
+                </form>
+            </div>
+
+            <!-- TAB 2: CARD / STRIPE GATEWAY -->
+            <div id="tab-content-card" style="display: none;">
+                <div style="background: var(--surface-subtle); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 1.5rem; text-align: center;">
+                    <div style="font-size: 1.5rem; color: var(--indigo); margin-bottom: 0.4rem;">
+                        <i class="fab fa-cc-stripe"></i> <i class="fab fa-cc-visa"></i> <i class="fab fa-cc-mastercard"></i>
+                    </div>
+                    <strong style="font-size: 0.95rem; display: block;">Credit / Debit Card &amp; Net Banking</strong>
+                    <span class="text-xs text-muted">Secured via Stripe SSL encryption</span>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" name="confirm_payment" class="btn btn-primary btn-block btn-lg" style="padding: 1rem; font-size: 1.05rem;">
+                        <i class="fas fa-credit-card"></i> Pay {{ "%.2f"|format(final_price) }} {{ course.currency.upper() }} via Stripe Card
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order & Course Info Sidebar (Right Column) -->
+    <div>
+        <!-- Course Summary Card -->
+        <div class="card" style="padding: 1.5rem; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
+                Order Summary
+            </h3>
+
+            <div style="margin-bottom: 1rem;">
+                <span class="badge badge-purple" style="margin-bottom: 0.35rem;">{{ course.category }}</span>
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
+                    {{ course.title }}
+                </h4>
+                <div class="text-xs text-muted">
+                    Instructor: <strong>{{ course.tutor.username }}</strong>
+                    {% if course.tutor.is_verified %}
+                        <i class="fas fa-check-circle text-primary" title="Verified Tutor"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Price Calculation Breakdown -->
+            <div style="border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 0.85rem 0; margin: 0.85rem 0; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.9rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span class="text-muted">Course Price:</span>
+                    <span>{{ "%.2f"|format(original_price) }} {{ course.currency.upper() }}</span>
+                </div>
+
+                {% if applied_coupon %}
+                <div style="display: flex; justify-content: space-between;" class="text-emerald font-semibold">
+                    <span>Coupon ({{ applied_coupon.code }}):</span>
+                    <span>- {{ "%.2f"|format(original_price - final_price) }} {{ course.currency.upper() }}</span>
+                </div>
+                {% endif %}
+
+                <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; padding-top: 0.5rem; border-top: 1px dashed var(--border);">
+                    <span>Total Amount:</span>
+                    <span class="text-primary">{{ "%.2f"|format(final_price) }} {{ course.currency.upper() }}</span>
+                </div>
+            </div>
+
+            <!-- Coupon Code Input -->
+            <form method="GET" action="{{ url_for('payment.checkout', course_id=course.id) }}" style="margin-top: 0.75rem;">
+                <label class="form-label font-semibold" style="font-size: 0.8rem;">Apply Discount Coupon</label>
+                <div style="display: flex; gap: 0.4rem;">
+                    <input type="text" name="coupon_code" class="form-control form-control-sm" placeholder="Code (e.g. SAVE20)" value="{{ applied_coupon.code if applied_coupon else '' }}" style="text-transform: uppercase;">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Apply</button>
+                </div>
+                {% if discount_msg %}
+                    <div class="text-xs text-emerald font-semibold" style="margin-top: 0.35rem;">
+                        <i class="fas fa-check-circle"></i> {{ discount_msg }}
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Course Details Highlights Card -->
+        <div class="card" style="padding: 1.25rem; font-size: 0.85rem;">
+            <h4 style="font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">Included with Course</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-infinity text-primary"></i> Full lifetime course access
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-file-download text-emerald"></i> Downloadable resources & materials
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-award text-amber"></i> Verified Certificate of Completion
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-comments text-indigo"></i> Direct tutor Q&amp;A messaging
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tab) {
+    var upiTab = document.getElementById('tab-content-upi');
+    var cardTab = document.getElementById('tab-content-card');
+    var upiBtn = document.getElementById('tab-btn-upi');
+    var cardBtn = document.getElementById('tab-btn-card');
+
+    if (tab === 'upi') {
+        upiTab.style.display = 'block';
+        cardTab.style.display = 'none';
+        upiBtn.className = 'btn btn-primary btn-sm';
+        cardBtn.className = 'btn btn-outline btn-sm';
+    } else {
+        upiTab.style.display = 'none';
+        cardTab.style.display = 'block';
+        upiBtn.className = 'btn btn-outline btn-sm';
+        cardBtn.className = 'btn btn-primary btn-sm';
+    }
+}
+</script>
+{% endblock %}

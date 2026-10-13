@@ -1,0 +1,172 @@
+<!-- ═══ AI Chatbot Floating Widget ═══ -->
+<div id="chatbot-widget" class="chatbot-widget" role="complementary" aria-label="AI Assistant">
+    <!-- Toggle Button -->
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open AI Assistant" aria-expanded="false" aria-controls="chatbot-panel">
+        <i class="fas fa-robot"></i>
+        <span class="chatbot-toggle-pulse"></span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div id="chatbot-panel" class="chatbot-panel" aria-hidden="true">
+        <div class="chatbot-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="chatbot-avatar"><i class="fas fa-robot"></i></div>
+                <div>
+                    <strong>EduConnect AI</strong>
+                    <span class="chatbot-status">Online</span>
+                </div>
+            </div>
+            <button id="chatbot-close" class="chatbot-close" aria-label="Close chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="chatbot-messages" class="chatbot-messages" role="log" aria-live="polite" aria-label="Chat messages">
+            <!-- Welcome Message -->
+            <div class="chatbot-msg chatbot-msg-bot">
+                <div class="chatbot-msg-avatar"><i class="fas fa-robot"></i></div>
+                <div class="chatbot-msg-bubble">
+                    Hi there! 👋 I'm your AI learning assistant. Ask me anything about courses, enrollment, or your learning goals!
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="chatbot-quick-actions" id="chatbot-quick-actions">
+            <button class="chatbot-quick-btn" data-msg="Which course fits my career goals?">🎯 Course for my goals</button>
+            <button class="chatbot-quick-btn" data-msg="Recommend me some courses based on what I'm studying">📚 Recommend courses</button>
+            <button class="chatbot-quick-btn" data-msg="How do I earn certificates on this platform?">🏆 How to earn certificates</button>
+        </div>
+
+        <!-- Input -->
+        <form id="chatbot-form" class="chatbot-input-area" aria-label="Send a message">
+            <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask me anything..." autocomplete="off" aria-label="Type your message">
+            <button type="submit" class="chatbot-send" aria-label="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const toggle = document.getElementById('chatbot-toggle');
+    const panel = document.getElementById('chatbot-panel');
+    const closeBtn = document.getElementById('chatbot-close');
+    const form = document.getElementById('chatbot-form');
+    const input = document.getElementById('chatbot-input');
+    const messagesEl = document.getElementById('chatbot-messages');
+    const quickActions = document.getElementById('chatbot-quick-actions');
+
+    if (!toggle || !panel) return;
+
+    // Toggle panel
+    function openChat() {
+        panel.classList.add('is-open');
+        panel.setAttribute('aria-hidden', 'false');
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.classList.add('is-active');
+        input.focus();
+    }
+
+    function closeChat() {
+        panel.classList.remove('is-open');
+        panel.setAttribute('aria-hidden', 'true');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.classList.remove('is-active');
+    }
+
+    toggle.addEventListener('click', () => {
+        if (panel.classList.contains('is-open')) closeChat(); else openChat();
+    });
+    closeBtn.addEventListener('click', closeChat);
+
+    // Escape to close
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('is-open')) closeChat();
+    });
+
+    // Add message to chat
+    function addMessage(text, isUser) {
+        const div = document.createElement('div');
+        div.className = `chatbot-msg ${isUser ? 'chatbot-msg-user' : 'chatbot-msg-bot'}`;
+        div.innerHTML = isUser
+            ? `<div class="chatbot-msg-bubble">${escapeHtml(text)}</div>`
+            : `<div class="chatbot-msg-avatar"><i class="fas fa-robot"></i></div><div class="chatbot-msg-bubble">${formatMarkdown(text)}</div>`;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // Typing indicator
+    function showTyping() {
+        const div = document.createElement('div');
+        div.className = 'chatbot-msg chatbot-msg-bot chatbot-typing';
+        div.id = 'chatbot-typing';
+        div.innerHTML = '<div class="chatbot-msg-avatar"><i class="fas fa-robot"></i></div><div class="chatbot-msg-bubble"><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function hideTyping() {
+        const el = document.getElementById('chatbot-typing');
+        if (el) el.remove();
+    }
+
+    function escapeHtml(t) {
+        const d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    }
+
+    function formatMarkdown(text) {
+        // Simple markdown: bold, bullets
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n• /g, '<br>• ')
+            .replace(/\n- /g, '<br>• ')
+            .replace(/\n/g, '<br>');
+    }
+
+    // Send message
+    async function sendMessage(text) {
+        if (!text.trim()) return;
+        addMessage(text, true);
+        // Hide quick actions after first message
+        if (quickActions) quickActions.style.display = 'none';
+        showTyping();
+
+        try {
+            const resp = await fetch('/ai/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: text})
+            });
+            const data = await resp.json();
+            hideTyping();
+            addMessage(data.reply || 'Sorry, something went wrong.', false);
+        } catch (err) {
+            hideTyping();
+            addMessage('Connection error. Please try again later.', false);
+        }
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (text) {
+            sendMessage(text);
+            input.value = '';
+        }
+    });
+
+    // Quick action buttons
+    if (quickActions) {
+        quickActions.addEventListener('click', (e) => {
+            const btn = e.target.closest('.chatbot-quick-btn');
+            if (btn) {
+                sendMessage(btn.dataset.msg);
+            }
+        });
+    }
+})();
+</script>

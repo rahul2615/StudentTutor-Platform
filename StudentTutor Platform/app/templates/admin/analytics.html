@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard — EduConnect Admin{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header animate-fade-in-up">
+    <div>
+        <h1 class="page-title" id="analytics-title">
+            <i class="fas fa-chart-line text-primary" aria-hidden="true"></i> Platform Analytics
+        </h1>
+        <p class="page-subtitle">Insights into platform activity, growth trends, and tutor performance</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" aria-label="Back to admin dashboard">
+        &larr; Admin Overview
+    </a>
+</div>
+
+<!-- Charts Grid -->
+<div class="grid-2 animate-fade-in-up" style="margin-bottom: 2rem;">
+    <!-- Enrollment Trends -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+            <div class="stat-icon stat-icon-indigo" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                <i class="fas fa-trending-up" aria-hidden="true"></i>
+            </div>
+            <h3 style="font-size: 1.05rem; color: var(--text-main); margin: 0;">Enrollment Trends (12 Months)</h3>
+        </div>
+        <canvas id="enrollmentChart" aria-label="Line chart showing enrollment trends over the last 12 months" role="img" style="max-height: 280px;"></canvas>
+    </div>
+
+    <!-- Category Distribution -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+            <div class="stat-icon stat-icon-emerald" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                <i class="fas fa-pie-chart" aria-hidden="true"></i>
+            </div>
+            <h3 style="font-size: 1.05rem; color: var(--text-main); margin: 0;">Course Categories</h3>
+        </div>
+        <canvas id="categoryChart" aria-label="Doughnut chart showing course distribution by category" role="img" style="max-height: 280px;"></canvas>
+    </div>
+
+    <!-- Top Courses -->
+    <div class="card" style="padding: 1.5rem; grid-column: 1 / -1;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+            <div class="stat-icon stat-icon-amber" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                <i class="fas fa-fire" aria-hidden="true"></i>
+            </div>
+            <h3 style="font-size: 1.05rem; color: var(--text-main); margin: 0;">Most Popular Courses</h3>
+        </div>
+        <canvas id="topCoursesChart" aria-label="Bar chart showing most popular courses by enrollment count" role="img" style="max-height: 280px;"></canvas>
+    </div>
+
+    <!-- Tutor Performance -->
+    <div class="card" style="padding: 1.5rem; grid-column: 1 / -1;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+            <div class="stat-icon stat-icon-purple" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+            </div>
+            <h3 style="font-size: 1.05rem; color: var(--text-main); margin: 0;">Tutor Performance</h3>
+        </div>
+        <div class="table-container">
+            <table class="table" id="tutor-perf-table" aria-label="Tutor performance metrics">
+                <thead>
+                    <tr>
+                        <th>Tutor</th>
+                        <th>Courses</th>
+                        <th>Total Students</th>
+                        <th>Avg Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="tutor-perf-body">
+                    <tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Loading analytics data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+(async function() {
+    const resp = await fetch('{{ url_for("admin.analytics_data") }}');
+    const data = await resp.json();
+
+    const COLORS = ['#4F46E5','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#06B6D4','#84CC16'];
+
+    // Enrollment Trends
+    const enrollCtx = document.getElementById('enrollmentChart').getContext('2d');
+    new Chart(enrollCtx, {
+        type: 'line',
+        data: {
+            labels: data.enrollment_trend.map(d => d.month),
+            datasets: [{
+                label: 'Enrollments',
+                data: data.enrollment_trend.map(d => d.count),
+                borderColor: '#4F46E5',
+                backgroundColor: 'rgba(79,70,229,0.08)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    // Category Distribution
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(catCtx, {
+        type: 'doughnut',
+        data: {
+            labels: data.category_dist.map(d => d.category),
+            datasets: [{
+                data: data.category_dist.map(d => d.count),
+                backgroundColor: COLORS
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+
+    // Top Courses
+    const topCtx = document.getElementById('topCoursesChart').getContext('2d');
+    new Chart(topCtx, {
+        type: 'bar',
+        data: {
+            labels: data.top_courses.map(d => d.title.length > 25 ? d.title.substring(0, 25) + '...' : d.title),
+            datasets: [{
+                label: 'Enrolled Students',
+                data: data.top_courses.map(d => d.enrolled),
+                backgroundColor: '#4F46E5',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+
+    // Tutor Performance Table
+    const tbody = document.getElementById('tutor-perf-body');
+    if (data.tutor_perf && data.tutor_perf.length > 0) {
+        tbody.innerHTML = data.tutor_perf.map(t => `
+            <tr>
+                <td><strong>${t.username}</strong></td>
+                <td>${t.courses}</td>
+                <td>${t.total_students}</td>
+                <td><span class="badge badge-warning">${t.avg_rating > 0 ? t.avg_rating + ' / 5' : 'N/A'}</span></td>
+            </tr>
+        `).join('');
+    } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No tutor performance data available.</td></tr>';
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Cancelled — EduConnect{% endblock %}
+
+{% block content %}
+<div class="empty-state" style="max-width: 550px; margin: 3rem auto; padding: 3rem 2rem;">
+    <div class="empty-state-icon" style="background-color: var(--amber-light, #fef3c7); color: var(--amber, #f59e0b);">
+        <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main);">Payment Cancelled</h1>
+    <p class="empty-state-desc">
+        Your checkout session was cancelled. No charges were made to your account.
+    </p>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+        {% if course %}
+            <a href="{{ url_for('payment.checkout', course_id=course.id) }}" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Try Checkout Again
+            </a>
+            <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline">
+                Back to Course
+            </a>
+        {% else %}
+            <a href="{{ url_for('student.courses') }}" class="btn btn-primary">
+                <i class="fas fa-book"></i> Browse Courses
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

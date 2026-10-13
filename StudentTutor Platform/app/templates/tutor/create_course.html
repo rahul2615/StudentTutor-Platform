@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Course — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fade-in-up" style="max-width: 660px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-plus-circle text-primary" aria-hidden="true"></i> Create New Course
+        </h1>
+        <p class="page-subtitle">Publish a new course for student enrollment</p>
+    </div>
+    <a href="{{ url_for('tutor.dashboard') }}" class="btn btn-outline">
+        &larr; Dashboard
+    </a>
+</div>
+
+<div class="form-wrapper animate-fade-in-up" style="max-width: 660px; margin: 0 auto; border-top: 4px solid var(--primary);">
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <!-- Section 1: Course Overview -->
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-info-circle text-primary" aria-hidden="true"></i> 1. Course Overview
+        </h3>
+
+        <!-- Course Title -->
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            <div class="input-icon-group">
+                {{ form.title(class="form-control", placeholder="e.g., Introduction to Computer Science") }}
+                <i class="fas fa-heading" aria-hidden="true"></i>
+            </div>
+        </div>
+
+        <!-- Category & Difficulty Level Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                {{ form.category.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.category(class="form-control") }}
+                    <i class="fas fa-tag" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.level.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.level(class="form-control") }}
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", placeholder="Describe what students will learn in this course...", rows=4) }}
+            <div class="form-hint">Summarize objectives, curriculum highlights, and target audience.</div>
+        </div>
+
+        <hr style="margin: 1.75rem 0; border: none; border-top: 1px solid var(--border);">
+
+        <!-- Section 2: Requirements & Duration -->
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-clock text-amber" aria-hidden="true"></i> 2. Requirements & Duration
+        </h3>
+
+        <!-- Prerequisites -->
+        <div class="form-group">
+            {{ form.prerequisites.label(class="form-label") }}
+            {{ form.prerequisites(class="form-control", placeholder="Recommended background knowledge or prerequisites...") }}
+        </div>
+
+        <!-- Duration -->
+        <div class="form-group">
+            {{ form.duration.label(class="form-label") }}
+            <div class="input-icon-group">
+                {{ form.duration(class="form-control", placeholder="e.g., 6 weeks (3 hrs/week)") }}
+                <i class="fas fa-clock" aria-hidden="true"></i>
+            </div>
+        </div>
+
+        <hr style="margin: 1.75rem 0; border: none; border-top: 1px solid var(--border);">
+
+        <!-- Section 3: Pricing -->
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-dollar-sign text-emerald" aria-hidden="true"></i> 3. Pricing
+        </h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                {{ form.price.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.price(class="form-control", placeholder="0.00") }}
+                    <i class="fas fa-tag" aria-hidden="true"></i>
+                </div>
+                <div class="form-hint">Set to 0.00 for a free course. Students pay before enrolling in paid courses.</div>
+            </div>
+            <div class="form-group">
+                {{ form.currency.label(class="form-label") }}
+                <div class="input-icon-group">
+                    {{ form.currency(class="form-control") }}
+                    <i class="fas fa-globe" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+
+        <hr style="margin: 1.75rem 0; border: none; border-top: 1px solid var(--border);">
+
+        <!-- Section 4: Course File Upload Dropzone -->
+        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-file-upload text-emerald" aria-hidden="true"></i> 4. Attach Learning Material
+        </h3>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+            {{ form.file.label(class="form-label") }}
+            <div style="background-color: var(--surface-subtle); padding: 1.35rem; border-radius: var(--radius-sm); border: 2px dashed var(--border); text-align: center;">
+                <div style="font-size: 1.5rem; color: var(--primary); margin-bottom: 0.5rem;">
+                    <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                </div>
+                {{ form.file(class="form-control", style="background: white;") }}
+                <div class="form-hint" style="margin-top: 0.5rem;">
+                    Supported formats: PDF, DOCX, PNG, JPG (max 15MB file size). Downloadable for offline study.
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+            Publish Course for Admin Approval <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>
+{% endblock %}

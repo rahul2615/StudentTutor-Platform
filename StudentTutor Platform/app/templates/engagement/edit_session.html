@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Live Session — {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 600px; margin: 0 auto 1.5rem;">
+    <div>
+        <h1 class="page-title">Edit Live Session</h1>
+        <p class="page-subtitle">Course: "{{ course.title }}"</p>
+    </div>
+    <a href="{{ url_for('tutor.course_details', course_id=course.id) }}" class="btn btn-outline">
+        Cancel
+    </a>
+</div>
+
+<div class="form-wrapper" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", rows=3) }}
+        </div>
+
+        <div class="form-group">
+            {{ form.scheduled_at.label(class="form-label") }}
+            {{ form.scheduled_at(class="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.duration_minutes.label(class="form-label") }}
+            {{ form.duration_minutes(class="form-control") }}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+            {{ form.meeting_link.label(class="form-label") }}
+            {{ form.meeting_link(class="form-control") }}
+            <div class="form-hint">Enter a full URL or a Jitsi room name.</div>
+        </div>
+
+        {% if form.recording_link %}
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            {{ form.recording_link.label(class="form-label") }}
+            {{ form.recording_link(class="form-control", placeholder="Optional: paste a recording URL") }}
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                Save Changes
+            </button>
+        </div>
+    </form>
+
+    <!-- Delete Session -->
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <form action="{{ url_for('engagement.delete_live_session', session_id=session_obj.id) }}" method="POST" onsubmit="return confirm('Permanently delete this live session?');">
+            <button type="submit" class="btn btn-outline-danger btn-block">
+                <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete This Session
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

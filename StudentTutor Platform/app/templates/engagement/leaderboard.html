@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard — EduConnect{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fade-in-up">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-trophy text-amber" aria-hidden="true"></i> Student Leaderboard
+        </h1>
+        <p class="page-subtitle">Earn points, build learning streaks, and unlock achievement badges</p>
+    </div>
+</div>
+
+<!-- Animated KPI Stats -->
+<div class="kpi-grid animate-fade-in-up">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-coins" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ current_user.points }}">{{ current_user.points }}</div>
+            <div class="kpi-label">Your Points</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-coral">
+            <i class="fas fa-fire" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ current_user.streak_days }}">{{ current_user.streak_days }}</div>
+            <div class="kpi-label">Active Streak Days</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-purple">
+            <i class="fas fa-award" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ current_user.badges|length }}">{{ current_user.badges|length }}</div>
+            <div class="kpi-label">Unlocked Badges</div>
+        </div>
+    </div>
+</div>
+
+<div class="grid-2 animate-fade-in-up">
+    <!-- Leaderboard Table -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
+            <i class="fas fa-medal text-amber" aria-hidden="true"></i> Top Student Learners
+        </h3>
+
+        {% if top_students %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Badges</th>
+                            <th style="text-align: right;">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in top_students %}
+                        <tr {% if s.id == current_user.id %}style="background-color: var(--primary-light); font-weight: 700;"{% endif %}>
+                            <td>
+                                {% if loop.index == 1 %}
+                                    <span style="font-size: 1.1rem;">🥇</span>
+                                {% elif loop.index == 2 %}
+                                    <span style="font-size: 1.1rem;">🥈</span>
+                                {% elif loop.index == 3 %}
+                                    <span style="font-size: 1.1rem;">🥉</span>
+                                {% else %}
+                                    <span class="text-muted">#{{ loop.index }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ s.username }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge badge-purple"><i class="fas fa-award" aria-hidden="true"></i> {{ s.badges|length }}</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <span class="badge badge-primary">{{ s.points }} Pts</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No leaderboard rankings available yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Your Badges -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
+            <i class="fas fa-star text-amber" aria-hidden="true"></i> Your Unlocked Badges
+        </h3>
+        {% if user_badges %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.85rem;" class="animate-stagger">
+                {% for b in user_badges %}
+                <div style="text-align: center; padding: 1rem; background: var(--surface-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🏆</div>
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">{{ b.badge_name }}</div>
+                    <div class="text-xs text-muted" style="margin-top: 0.2rem;">{{ b.earned_at.strftime('%b %d') }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 1.5rem;">
+                <div class="empty-state-icon">
+                    <i class="fas fa-award" aria-hidden="true"></i>
+                </div>
+                <h4 class="empty-state-title" style="font-size: 0.95rem;">No badges earned yet</h4>
+                <p class="empty-state-desc" style="font-size: 0.85rem;">Complete courses, score high on quizzes, and review courses to unlock badges.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard — EduConnect{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner Header -->
+<div class="welcome-banner animate-fade-in-up">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-purple" style="margin-bottom: 0.5rem;">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i> Administration Command Center
+            </span>
+            <h1>Platform Overview</h1>
+            <p>Monitor real-time metrics, manage user roles, and review pending approval queues.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Colorful KPI Cards with Animated Number Counters -->
+<div class="kpi-grid animate-fade-in-up">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-indigo">
+            <i class="fas fa-book" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_courses }}">{{ total_courses }}</div>
+            <div class="kpi-label">Total Courses</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-emerald">
+            <i class="fas fa-user-graduate" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_students }}">{{ total_students }}</div>
+            <div class="kpi-label">Registered Students</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ total_tutors }}">{{ total_tutors }}</div>
+            <div class="kpi-label">Approved Tutors</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-coral">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter" data-target="{{ pending_tutors + pending_courses }}">{{ pending_tutors + pending_courses }}</div>
+            <div class="kpi-label">Pending Approvals</div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation into Approval Queues & Features -->
+<div class="page-header" style="margin-top: 2rem; margin-bottom: 1.25rem;">
+    <div>
+        <h2 class="page-title">Management & Governance Queues</h2>
+        <p class="page-subtitle">Quick navigation to pending approvals and platform management</p>
+    </div>
+</div>
+
+<div class="grid-3 animate-stagger">
+    <!-- Tutor Approvals -->
+    <a href="{{ url_for('admin.tutor_approval') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-tutor-approval">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-amber">
+                    <i class="fas fa-user-check" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Tutor Applications</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Review pending instructor sign-ups</p>
+                </div>
+            </div>
+            {% if pending_tutors > 0 %}
+                <span class="badge badge-warning">{{ pending_tutors }} Pending</span>
+            {% else %}
+                <span class="badge badge-success"><i class="fas fa-check" aria-hidden="true"></i> Clear</span>
+            {% endif %}
+        </div>
+    </a>
+
+    <!-- Course Approvals -->
+    <a href="{{ url_for('admin.course_approval') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-course-approval">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-emerald">
+                    <i class="fas fa-book-open" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Course Submissions</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Publish submitted tutor courses</p>
+                </div>
+            </div>
+            {% if pending_courses > 0 %}
+                <span class="badge badge-warning">{{ pending_courses }} Pending</span>
+            {% else %}
+                <span class="badge badge-success"><i class="fas fa-check" aria-hidden="true"></i> Clear</span>
+            {% endif %}
+        </div>
+    </a>
+
+    <!-- Registered Users -->
+    <a href="{{ url_for('admin.registered_users') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-manage-users">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-indigo">
+                    <i class="fas fa-users-cog" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Manage Users</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Students and tutors catalog</p>
+                </div>
+            </div>
+            <span class="badge badge-primary">View All</span>
+        </div>
+    </a>
+
+    <!-- Analytics -->
+    <a href="{{ url_for('admin.analytics') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-analytics">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-blue">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Analytics</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Platform activity trends & charts</p>
+                </div>
+            </div>
+            <span class="badge badge-secondary">Open</span>
+        </div>
+    </a>
+
+    <!-- Audit Log -->
+    <a href="{{ url_for('admin.audit_log') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-audit-log">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-purple">
+                    <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Audit Log</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Administrative history</p>
+                </div>
+            </div>
+            <span class="badge badge-secondary">View Log</span>
+        </div>
+    </a>
+
+    <!-- Content Flags -->
+    <a href="{{ url_for('admin.content_flags') }}" class="card card-interactive" style="padding: 1.5rem; text-decoration: none;" id="nav-content-flags">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div class="stat-icon stat-icon-coral">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.2rem;">Content Flags</h3>
+                    <p class="text-xs text-muted" style="margin: 0;">Moderation & flagged items</p>
+                </div>
+            </div>
+            {% if unresolved_flags > 0 %}
+                <span class="badge badge-danger">{{ unresolved_flags }} Unresolved</span>
+            {% else %}
+                <span class="badge badge-success"><i class="fas fa-check" aria-hidden="true"></i> Clear</span>
+            {% endif %}
+        </div>
+    </a>
+</div>
+{% endblock %}

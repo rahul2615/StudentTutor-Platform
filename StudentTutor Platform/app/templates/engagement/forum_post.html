@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} — Discussion{% endblock %}
+
+{% block content %}
+<div class="page-header" style="max-width: 760px; margin: 0 auto 1.5rem;">
+    <div>
+        <a href="{{ url_for('engagement.course_forum', course_id=post.course_id) }}" class="btn btn-outline btn-sm" style="margin-bottom: 0.75rem;">
+            &larr; Back to Forum
+        </a>
+        <h1 class="page-title">{{ post.title }}</h1>
+    </div>
+</div>
+
+<div style="max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- Original Post Card -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <div class="nav-user-avatar" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                    {{ post.author.username[0]|upper }}
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">{{ post.author.username }}</div>
+                    <span class="badge badge-secondary" style="font-size: 0.7rem;">
+                        {{ post.author.role|capitalize }}
+                    </span>
+                </div>
+            </div>
+            <div class="text-xs text-muted">
+                {{ post.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+            </div>
+        </div>
+
+        <div style="line-height: 1.6; color: var(--text-body); font-size: 0.925rem; white-space: pre-line;">
+            {{ post.content }}
+        </div>
+    </div>
+
+    <!-- Replies Header -->
+    <h2 style="font-size: 1.15rem; font-weight: 600;">
+        Replies ({{ post.comments|length }})
+    </h2>
+
+    <!-- Replies List -->
+    {% if post.comments %}
+        <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            {% for comment in post.comments %}
+            <div class="card" style="padding: 1.1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;">{{ comment.author.username }}</span>
+                        {% if comment.author.role == 'tutor' %}
+                            <span class="badge badge-secondary" style="font-size: 0.65rem;">Tutor</span>
+                        {% endif %}
+                    </div>
+                    <span class="text-xs text-muted">{{ comment.created_at.strftime('%b %d at %I:%M %p') }}</span>
+                </div>
+                <div style="line-height: 1.5; color: var(--text-body); font-size: 0.875rem; white-space: pre-line;">
+                    {{ comment.content }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Add Reply Form -->
+    <div class="form-wrapper">
+        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.85rem;">
+            Post a Reply
+        </h3>
+        <form method="POST">
+            {{ comment_form.hidden_tag() }}
+            <div class="form-group" style="margin-bottom: 1rem;">
+                {{ comment_form.content(class="form-control", placeholder="Write your reply...", rows=3) }}
+            </div>
+            <button type="submit" class="btn btn-primary">
+                Submit Reply
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Tutor Earnings &amp; Payouts — EduConnect{% endblock %}
+
+{% block content %}
+<div class="welcome-banner animate-fade-in-up">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="badge badge-success" style="margin-bottom: 0.5rem;">
+                <i class="fas fa-wallet" aria-hidden="true"></i> Financial Studio
+            </span>
+            <h1>Earnings &amp; Payouts</h1>
+            <p>Track your course sales revenue, platform fees, and request payouts.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <a href="{{ url_for('tutor.handle_payment_settings') }}" class="btn btn-outline">
+                <i class="fas fa-qrcode"></i> Payment &amp; UPI Settings
+                {% if current_user.upi_id or current_user.qr_code_path %}
+                    <span class="badge badge-success" style="font-size: 0.65rem; margin-left: 0.35rem;">Set</span>
+                {% else %}
+                    <span class="badge badge-warning" style="font-size: 0.65rem; margin-left: 0.35rem;">Not Set</span>
+                {% endif %}
+            </a>
+            <form action="{{ url_for('tutor.handle_request_payout') }}" method="POST" style="margin: 0;">
+                <button type="submit" class="btn btn-primary btn-lg" {% if balance_info.available_balance <= 0 %}disabled{% endif %}>
+                    <i class="fas fa-hand-holding-usd" aria-hidden="true"></i> Request Payout (${{ "%.2f"|format(balance_info.available_balance) }})
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid animate-fade-in-up" style="margin-bottom: 2rem;">
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-emerald">
+            <i class="fas fa-dollar-sign" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter">${{ "%.2f"|format(balance_info.net_earnings) }}</div>
+            <div class="kpi-label">Lifetime Net Revenue</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-indigo">
+            <i class="fas fa-piggy-bank" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter">${{ "%.2f"|format(balance_info.available_balance) }}</div>
+            <div class="kpi-label">Available Balance</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-amber">
+            <i class="fas fa-receipt" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter">{{ balance_info.completed_sales_count }}</div>
+            <div class="kpi-label">Total Course Sales</div>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="stat-icon stat-icon-purple">
+            <i class="fas fa-percentage" aria-hidden="true"></i>
+        </div>
+        <div>
+            <div class="stat-counter">{{ "%.0f"|format(balance_info.platform_fee_percent) }}%</div>
+            <div class="kpi-label">Platform Fee Rate</div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Course Sales Table -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">
+            <i class="fas fa-shopping-cart text-primary"></i> Recent Course Sales ({{ sales|length }})
+        </h3>
+        {% if sales %}
+            <div style="overflow-x: auto;">
+                <table class="table" style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Amount</th>
+                            <th>Method / UTR</th>
+                            <th>Proof</th>
+                            <th>Status / Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in sales %}
+                        <tr>
+                            <td><strong>{{ payment.student.username }}</strong></td>
+                            <td>{{ payment.course.title }}</td>
+                            <td class="font-bold text-emerald">${{ "%.2f"|format(payment.amount) }}</td>
+                            <td class="text-xs">
+                                {% if payment.gateway == 'upi_qr' %}
+                                    <span class="badge badge-purple" style="font-size: 0.65rem;"><i class="fas fa-qrcode"></i> UPI</span>
+                                    {% if payment.transaction_ref %}
+                                        <div class="font-mono text-xs text-primary" style="margin-top: 2px;">UTR: {{ payment.transaction_ref }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge badge-secondary" style="font-size: 0.65rem;">Stripe</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.payment_proof %}
+                                    <a href="{{ url_for('static', filename=payment.payment_proof) }}" target="_blank" class="btn btn-outline btn-xs" style="font-size: 0.7rem;">
+                                        <i class="fas fa-image"></i> Proof
+                                    </a>
+                                {% else %}
+                                    <span class="text-xs text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.status == 'completed' %}
+                                    <span class="badge badge-success" style="font-size: 0.7rem;"><i class="fas fa-check-circle"></i> Completed</span>
+                                {% elif payment.status == 'pending' and payment.gateway == 'upi_qr' %}
+                                    <div style="display: flex; gap: 0.25rem;">
+                                        <form action="{{ url_for('payment.verify_upi', payment_id=payment.id) }}" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="btn btn-success btn-xs" style="font-size: 0.7rem;" title="Approve Payment">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <form action="{{ url_for('payment.verify_upi', payment_id=payment.id) }}" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="action" value="reject">
+                                            <button type="submit" class="btn btn-outline-danger btn-xs" style="font-size: 0.7rem;" title="Reject Payment">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="badge badge-warning" style="font-size: 0.7rem;">{{ payment.status|title }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-xs text-muted">No course sales recorded yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Payout History Table -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">
+            <i class="fas fa-history text-indigo"></i> Payout History ({{ payout_history|length }})
+        </h3>
+        {% if payout_history %}
+            <div style="overflow-x: auto;">
+                <table class="table" style="width: 100%; font-size: 0.875rem;">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>Requested At</th>
+                            <th>Paid At</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payout_history %}
+                        <tr>
+                            <td class="font-bold">${{ "%.2f"|format(p.amount) }}</td>
+                            <td class="text-xs text-muted">{{ p.requested_at.strftime('%b %d, %Y') }}</td>
+                            <td class="text-xs text-muted">{{ p.paid_at.strftime('%b %d, %Y') if p.paid_at else '—' }}</td>
+                            <td>
+                                {% if p.status == 'paid' %}
+                                    <span class="badge badge-success" style="font-size: 0.7rem;">Paid</span>
+                                {% else %}
+                                    <span class="badge badge-warning" style="font-size: 0.7rem;">Pending Admin</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-xs text-muted">No payout requests submitted yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

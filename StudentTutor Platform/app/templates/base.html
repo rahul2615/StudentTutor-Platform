@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EduConnect — Online Learning Platform{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Learn from expert tutors or share your knowledge on EduConnect.{% endblock %}">
+    <meta name="theme-color" content="#4F46E5">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Unified Design System Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block page_styles %}{% endblock %}
+</head>
+<body>
+
+    <!-- Skip to Content (Accessibility) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Header & Navigation Bar -->
+    <header class="navbar" role="banner">
+        <div class="app-container nav-container">
+            <a href="{{ url_for('home.index') }}" class="nav-brand" aria-label="EduConnect Home">
+                <div class="nav-brand-icon">
+                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                </div>
+                <span>EduConnect</span>
+            </a>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navMenu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+
+            <!-- Navigation Links -->
+            <nav class="nav-menu" id="navMenu" role="navigation" aria-label="Main navigation">
+                {% if current_user.is_authenticated %}
+                    {# Student Nav #}
+                    {% if current_user.role == 'student' %}
+                        <a href="{{ url_for('student.dashboard') }}" class="nav-link {% if request.endpoint == 'student.dashboard' %}active{% endif %}" id="nav-student-dashboard">
+                            <i class="fas fa-columns" aria-hidden="true"></i> Dashboard
+                        </a>
+                        <a href="{{ url_for('student.courses') }}" class="nav-link {% if request.endpoint == 'student.courses' %}active{% endif %}" id="nav-browse-courses">
+                            <i class="fas fa-compass" aria-hidden="true"></i> Browse Courses
+                        </a>
+                        <a href="{{ url_for('engagement.view_wishlist') }}" class="nav-link {% if request.endpoint == 'engagement.view_wishlist' %}active{% endif %}" id="nav-wishlist">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i> Wishlist
+                        </a>
+                        <a href="{{ url_for('payment.pricing') }}" class="nav-link {% if request.endpoint == 'payment.pricing' %}active{% endif %}" id="nav-pricing">
+                            <i class="fas fa-crown text-amber" aria-hidden="true"></i> Pass &amp; Pricing
+                        </a>
+
+                    {# Tutor Nav #}
+                    {% elif current_user.role == 'tutor' %}
+                        <a href="{{ url_for('tutor.dashboard') }}" class="nav-link {% if request.endpoint == 'tutor.dashboard' %}active{% endif %}" id="nav-tutor-dashboard">
+                            <i class="fas fa-columns" aria-hidden="true"></i> Dashboard
+                        </a>
+                        <a href="{{ url_for('tutor.handle_create_course') }}" class="nav-link {% if request.endpoint == 'tutor.handle_create_course' %}active{% endif %}" id="nav-create-course">
+                            <i class="fas fa-plus-circle" aria-hidden="true"></i> Create Course
+                        </a>
+                        <a href="{{ url_for('tutor.view_courses') }}" class="nav-link {% if request.endpoint == 'tutor.view_courses' %}active{% endif %}" id="nav-all-courses">
+                            <i class="fas fa-book-open" aria-hidden="true"></i> All Courses
+                        </a>
+                        <a href="{{ url_for('tutor.earnings_dashboard') }}" class="nav-link {% if request.endpoint == 'tutor.earnings_dashboard' %}active{% endif %}" id="nav-tutor-earnings">
+                            <i class="fas fa-wallet text-emerald" aria-hidden="true"></i> Earnings
+                        </a>
+
+                    {# Admin Nav #}
+                    {% elif current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" id="nav-admin-overview">
+                            <i class="fas fa-chart-pie" aria-hidden="true"></i> Overview
+                        </a>
+                        <a href="{{ url_for('admin.tutor_approval') }}" class="nav-link {% if request.endpoint == 'admin.tutor_approval' %}active{% endif %}" id="nav-admin-tutors">
+                            <i class="fas fa-user-check" aria-hidden="true"></i> Tutors
+                        </a>
+                        <a href="{{ url_for('admin.course_approval') }}" class="nav-link {% if request.endpoint == 'admin.course_approval' %}active{% endif %}" id="nav-admin-courses">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i> Courses
+                        </a>
+                        <a href="{{ url_for('admin.registered_users') }}" class="nav-link {% if request.endpoint == 'admin.registered_users' %}active{% endif %}" id="nav-admin-users">
+                            <i class="fas fa-users" aria-hidden="true"></i> Users
+                        </a>
+                        <a href="{{ url_for('admin.analytics') }}" class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" id="nav-admin-analytics">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i> Analytics
+                        </a>
+                        <a href="{{ url_for('admin.audit_log') }}" class="nav-link {% if request.endpoint == 'admin.audit_log' %}active{% endif %}" id="nav-admin-audit">
+                            <i class="fas fa-clipboard-list" aria-hidden="true"></i> Audit Log
+                        </a>
+                        <a href="{{ url_for('admin.content_flags') }}" class="nav-link {% if request.endpoint == 'admin.content_flags' %}active{% endif %}" id="nav-admin-flags">
+                            <i class="fas fa-flag" aria-hidden="true"></i> Flags
+                        </a>
+                        <a href="{{ url_for('admin.manage_coupons') }}" class="nav-link {% if request.endpoint == 'admin.manage_coupons' or request.endpoint == 'admin.create_coupon' or request.endpoint == 'admin.edit_coupon' %}active{% endif %}" id="nav-admin-coupons">
+                            <i class="fas fa-ticket-alt text-amber" aria-hidden="true"></i> Coupons
+                        </a>
+                        <a href="{{ url_for('admin.manage_payouts') }}" class="nav-link {% if request.endpoint == 'admin.manage_payouts' %}active{% endif %}" id="nav-admin-payouts">
+                            <i class="fas fa-hand-holding-usd text-emerald" aria-hidden="true"></i> Payouts
+                        </a>
+                    {% endif %}
+
+                    <!-- Shared Engagement Links -->
+                    <a href="{{ url_for('engagement.calendar_view') }}" class="nav-link {% if request.endpoint == 'engagement.calendar_view' %}active{% endif %}" id="nav-schedule">
+                        <i class="fas fa-calendar-alt" aria-hidden="true"></i> Schedule
+                    </a>
+                    <a href="{{ url_for('engagement.inbox') }}" class="nav-link {% if request.endpoint == 'engagement.inbox' or request.endpoint == 'engagement.chat_thread' %}active{% endif %}" id="nav-messages">
+                        <i class="fas fa-comments" aria-hidden="true"></i> Messages
+                    </a>
+                    <a href="{{ url_for('engagement.leaderboard') }}" class="nav-link {% if request.endpoint == 'engagement.leaderboard' %}active{% endif %}" id="nav-leaderboard">
+                        <i class="fas fa-trophy" aria-hidden="true"></i> Leaderboard
+                    </a>
+
+                    <!-- User Profile Link & Points Pill -->
+                    <a href="{{ url_for('auth.profile') }}" class="nav-user-info" id="nav-profile" aria-label="View profile for {{ current_user.username }}">
+                        {% if current_user.profile_pic %}
+                            <img src="{{ url_for('static', filename=current_user.profile_pic) }}" alt="{{ current_user.username }}'s avatar" class="nav-user-avatar" style="object-fit: cover;">
+                        {% else %}
+                            <div class="nav-user-avatar" aria-hidden="true">
+                                {{ current_user.username[0]|upper }}
+                            </div>
+                        {% endif %}
+                        <span>{{ current_user.username }}</span>
+                        <span class="badge badge-primary">{{ current_user.points }} pts</span>
+                    </a>
+
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm" id="nav-logout" aria-label="Logout">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('home.index') }}" class="nav-link {% if request.endpoint == 'home.index' %}active{% endif %}" id="nav-home">
+                        <i class="fas fa-home" aria-hidden="true"></i> Home
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm" id="nav-signin">
+                        Sign In
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm" id="nav-join">
+                        Get Started Free
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- Flash Messages Container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container app-container" role="alert" aria-live="assertive">
+            {% for category, message in messages %}
+            <div class="alert alert-{% if category == 'message' %}info{% elif category == 'danger' %}danger{% elif category == 'warning' %}warning{% elif category == 'success' %}success{% else %}{{ category }}{% endif %}">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    {% if category == 'success' %}
+                        <i class="fas fa-check-circle text-success" aria-hidden="true"></i>
+                    {% elif category == 'danger' %}
+                        <i class="fas fa-exclamation-circle text-danger" aria-hidden="true"></i>
+                    {% elif category == 'warning' %}
+                        <i class="fas fa-exclamation-triangle text-amber" aria-hidden="true"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle text-primary" aria-hidden="true"></i>
+                    {% endif %}
+                    <div>{{ message|safe }}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: inherit; opacity: 0.6;" aria-label="Dismiss message">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Page Content -->
+    <main class="app-main" id="main-content" role="main">
+        <div class="app-container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Shared Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="app-container footer-content">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--text-main);">
+                <div class="stat-icon stat-icon-indigo" style="width: 28px; height: 28px; font-size: 0.85rem;">
+                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                </div>
+                <span>EduConnect</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                {% include 'partials/language_selector.html' %}
+                <span>&copy; {{ current_year | default('2026') }} EduConnect Online Tutoring Platform. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Chatbot Widget (for logged-in users) -->
+    {% if current_user.is_authenticated %}
+        {% include 'ai/chatbot_widget.html' %}
+    {% endif %}
+
+    <!-- Interactive Client Script -->
+    <script src="{{ url_for('static', filename='main/main.js') }}"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+            .catch(function(err) { console.warn('SW registration failed:', err); });
+    }
+    </script>
+
+    {% block page_scripts %}{% endblock %}
+</body>
+</html>

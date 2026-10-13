@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}EduConnect Pass — Unlimited Learning Plans{% endblock %}
+
+{% block content %}
+<div class="welcome-banner animate-fade-in-up" style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem; padding: 2.5rem 1.5rem;">
+    <span class="badge badge-purple" style="font-size: 0.9rem; padding: 0.4rem 1rem; margin-bottom: 0.75rem;">
+        <i class="fas fa-crown"></i> EduConnect Pass
+    </span>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">Unlimited Access to Every Course</h1>
+    <p style="font-size: 1.1rem; color: var(--text-muted); margin: 0 auto; max-width: 600px;">
+        Subscribe to EduConnect Pass for unlimited access to all authored courses, live sessions, quizzes, and instant certificates.
+    </p>
+</div>
+
+<div style="max-width: 950px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+    <!-- Per Course Option -->
+    <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border);">
+        <div>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="badge badge-secondary" style="margin-bottom: 0.5rem;">Standard</span>
+                <h3 style="font-size: 1.4rem; font-weight: 700;">Pay Per Course</h3>
+                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin: 0.75rem 0 0.25rem;">
+                    $9.99 <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">/ course avg</span>
+                </div>
+                <p class="text-xs text-muted">Buy courses individually as you need them</p>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 2rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Lifetime access to purchased course
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Course materials & downloads
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Completion Certificate
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted);">
+                    <i class="fas fa-times text-muted"></i> No access to other premium courses
+                </li>
+            </ul>
+        </div>
+
+        <a href="{{ url_for('student.courses') }}" class="btn btn-outline btn-block btn-lg">
+            Browse Courses
+        </a>
+    </div>
+
+    <!-- Monthly Pass Option -->
+    <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; border: 2px solid var(--primary); background: var(--surface-subtle); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 12px; right: -30px; transform: rotate(45deg); background: var(--primary); color: white; padding: 4px 30px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">
+            Popular
+        </div>
+
+        <div>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="badge badge-primary" style="margin-bottom: 0.5rem;"><i class="fas fa-bolt"></i> Monthly Pass</span>
+                <h3 style="font-size: 1.4rem; font-weight: 700;">EduConnect Monthly</h3>
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 0.75rem 0 0.25rem;">
+                    $19.99 <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">/ month</span>
+                </div>
+                <p class="text-xs text-muted">Full access to ALL present & future courses</p>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 2rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald font-bold"></i> <strong>Unlimited access to ALL courses</strong>
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Live session attendance & recordings
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Unlimited Certificates
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> AI Chatbot Assistant Included
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Cancel anytime with one click
+                </li>
+            </ul>
+        </div>
+
+        <form action="{{ url_for('payment.subscribe', plan='monthly') }}" method="POST">
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="font-weight: 700;">
+                <i class="fas fa-crown"></i> Subscribe Monthly ($19.99/mo)
+            </button>
+        </form>
+    </div>
+
+    <!-- Yearly Pass Option -->
+    <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border);">
+        <div>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="badge badge-success" style="margin-bottom: 0.5rem;">Best Value</span>
+                <h3 style="font-size: 1.4rem; font-weight: 700;">EduConnect Yearly</h3>
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--emerald); margin: 0.75rem 0 0.25rem;">
+                    $149.99 <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-muted);">/ year</span>
+                </div>
+                <p class="text-xs text-emerald font-semibold">Save over 35% compared to monthly!</p>
+            </div>
+
+            <ul style="list-style: none; padding: 0; margin: 0 0 2rem; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald font-bold"></i> <strong>Everything in Monthly Pass</strong>
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> Priority tutor Q&A support
+                </li>
+                <li style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-check text-emerald"></i> 2 months FREE compared to monthly
+                </li>
+            </ul>
+        </div>
+
+        <form action="{{ url_for('payment.subscribe', plan='yearly') }}" method="POST">
+            <button type="submit" class="btn btn-outline-primary btn-block btn-lg" style="font-weight: 700;">
+                Subscribe Yearly ($149.99/yr)
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

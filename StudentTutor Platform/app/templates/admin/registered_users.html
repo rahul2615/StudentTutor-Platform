@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Registered Users — Admin Panel{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header animate-fade-in-up">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-users-cog text-primary" aria-hidden="true"></i> User Account Management
+        </h1>
+        <p class="page-subtitle">Inspect registered students and verified tutor accounts</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">
+        &larr; Admin Overview
+    </a>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 2.5rem;" class="animate-fade-in-up">
+    <!-- Registered Students Section -->
+    <div>
+        {% set students = students_pagination.items if students_pagination else [] %}
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-user-graduate text-primary" aria-hidden="true"></i> Registered Students
+            </h2>
+            <span class="badge badge-primary">{{ students_pagination.total if students_pagination else 0 }} Total</span>
+        </div>
+
+        {% if students %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Student Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td style="color: var(--text-muted); font-weight: 600;">#{{ student.id }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                    {% if student.profile_pic %}
+                                        <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="" style="width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover;">
+                                    {% else %}
+                                        <div class="nav-user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                            {{ student.username[0]|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <strong style="color: var(--text-main);">{{ student.username }}</strong>
+                                </div>
+                            </td>
+                            <td>{{ student.email or 'N/A' }}</td>
+                            <td><span class="badge badge-primary">Student</span></td>
+                            <td style="text-align: right;">
+                                <form action="{{ url_for('admin.delete_user', user_id=student.id) }}" method="POST" onsubmit="return confirm('Delete student {{ student.username }}?');" style="display: inline-block;">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if students_pagination and students_pagination.pages > 1 %}
+            <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                {% if students_pagination.has_prev %}
+                    <a href="{{ url_for('admin.registered_users', page_students=students_pagination.prev_num, page_tutors=tutors_pagination.page) }}" class="btn btn-outline btn-sm">
+                        &larr; Previous
+                    </a>
+                {% endif %}
+                <span class="text-xs text-muted font-semibold">
+                    Students Page {{ students_pagination.page }} of {{ students_pagination.pages }}
+                </span>
+                {% if students_pagination.has_next %}
+                    <a href="{{ url_for('admin.registered_users', page_students=students_pagination.next_num, page_tutors=tutors_pagination.page) }}" class="btn btn-outline btn-sm">
+                        Next &rarr;
+                    </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <h3 class="empty-state-title">No registered students</h3>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Approved Tutors Section -->
+    <div>
+        {% set tutors = tutors_pagination.items if tutors_pagination else [] %}
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-chalkboard-teacher text-purple" aria-hidden="true"></i> Approved Tutors
+            </h2>
+            <span class="badge badge-purple">{{ tutors_pagination.total if tutors_pagination else 0 }} Total</span>
+        </div>
+
+        {% if tutors %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Tutor Username</th>
+                            <th>Email</th>
+                            <th>Role & Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tutor in tutors %}
+                        <tr>
+                            <td style="color: var(--text-muted); font-weight: 600;">#{{ tutor.id }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                    {% if tutor.profile_pic %}
+                                        <img src="{{ url_for('static', filename=tutor.profile_pic) }}" alt="" style="width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover;">
+                                    {% else %}
+                                        <div class="nav-user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: var(--accent-purple);">
+                                            {{ tutor.username[0]|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <strong style="color: var(--text-main);">{{ tutor.username }}</strong>
+                                    {% if tutor.is_verified %}
+                                        <i class="fas fa-check-circle text-primary" title="Verified Tutor Credentials" aria-hidden="true"></i>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>{{ tutor.email or 'N/A' }}</td>
+                            <td>
+                                <span class="badge badge-purple">Tutor</span>
+                                {% if tutor.is_verified %}
+                                    <span class="badge badge-success"><i class="fas fa-check-circle" aria-hidden="true"></i> Verified</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+                                    <form action="{{ url_for('admin.toggle_verify_tutor', tutor_id=tutor.id) }}" method="POST" style="display: inline-block;">
+                                        <button type="submit" class="btn {% if tutor.is_verified %}btn-outline-primary{% else %}btn-primary{% endif %} btn-sm">
+                                            <i class="fas fa-shield-alt" aria-hidden="true"></i> {% if tutor.is_verified %}Unverify{% else %}Verify Badge{% endif %}
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin.delete_user', user_id=tutor.id) }}" method="POST" onsubmit="return confirm('Delete tutor {{ tutor.username }}?');" style="display: inline-block;">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if tutors_pagination and tutors_pagination.pages > 1 %}
+            <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                {% if tutors_pagination.has_prev %}
+                    <a href="{{ url_for('admin.registered_users', page_tutors=tutors_pagination.prev_num, page_students=students_pagination.page) }}" class="btn btn-outline btn-sm">
+                        &larr; Previous
+                    </a>
+                {% endif %}
+                <span class="text-xs text-muted font-semibold">
+                    Tutors Page {{ tutors_pagination.page }} of {{ tutors_pagination.pages }}
+                </span>
+                {% if tutors_pagination.has_next %}
+                    <a href="{{ url_for('admin.registered_users', page_tutors=tutors_pagination.next_num, page_students=students_pagination.page) }}" class="btn btn-outline btn-sm">
+                        Next &rarr;
+                    </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <h3 class="empty-state-title">No approved tutors</h3>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
